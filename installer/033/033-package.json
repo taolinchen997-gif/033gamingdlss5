@@ -1,0 +1,715 @@
+{
+  "Profiles": [
+    {
+      "Id": "yanyun-exclusive-x64",
+      "Mode": "native",
+      "Architecture": "x64",
+      "Imports": [
+        "d3d11.dll",
+        "d3d10.dll",
+        "dxgi.dll",
+        "d3d12.dll"
+      ],
+      "Files": [
+        {
+          "Source": "payload/host64/033-runtime/nvngx_dlssnr.dll",
+          "Target": "033-runtime/nvngx_dlssnr.dll",
+          "Hash": "6eb209e764f39872625debd6abaf45e2bb6322f6f270f781f70c059ae30b3927",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "model"
+        },
+        {
+          "Source": "payload/crt-s3/msvcp140.dll",
+          "Target": "033-runtime/msvcp140.dll",
+          "Hash": "0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/msvcp140_atomic_wait.dll",
+          "Target": "033-runtime/msvcp140_atomic_wait.dll",
+          "Hash": "640b2aefced484d0368eea5bdd06addd0658a3a70a49256e560d6923b404a479",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/vcruntime140.dll",
+          "Target": "033-runtime/vcruntime140.dll",
+          "Hash": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/vcruntime140_1.dll",
+          "Target": "033-runtime/vcruntime140_1.dll",
+          "Hash": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/seeds/native/dlss5-033.cfg",
+          "Target": "dlss5-033.cfg",
+          "Hash": "898abc82be45784f9d0ebc0f36933493af674459fe8cf56c6003be41cf5ff1c5",
+          "Architecture": null,
+          "Policy": "seed",
+          "Role": "config"
+        },
+        {
+          "Source": "payload/mfg2030/nvngx.dll",
+          "Target": "version.dll",
+          "Hash": "01204ac77840de5dcfee8c477beabdb58d8c6551c262f05e5efdf66d5f784d2a",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "fg-bridge-loader",
+          "Component": "mfg2030"
+        },
+        {
+          "Source": "payload/mfg2030/dlssg_to_fsr3.ini",
+          "Target": "dlssg_to_fsr3.ini",
+          "Hash": "b22781dca2b0252139c91ce4cff75dcbd4f0dd73a08085e292329a918a02d9a2",
+          "Architecture": null,
+          "Policy": "seed",
+          "Role": "fg-bridge-config",
+          "Component": "mfg2030",
+          "SeedMerge": "033-mfg-v1"
+        },
+        {
+          "Source": "payload/unified-u1/seeds/033-monitor.cfg",
+          "Target": "033-monitor.cfg",
+          "Hash": "c7a20fd92acfbfc6ffdf4f659184e329a280a8de0532019f13b47d9f5c432fc1",
+          "Architecture": null,
+          "Policy": "seed",
+          "Role": "monitor-config"
+        },
+        {
+          "Source": "payload/mfg2030/nvngx_dlssg.sm75.dll",
+          "Target": "nvngx_dlssg.sm75.dll",
+          "Hash": "08136c4756be2ae4d4be88a971b9ac0830b978beb15f5721390a228d53511c63",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "fg-bridge-provider",
+          "Component": "mfg2030"
+        },
+        {
+          "Source": "payload/mfg2030/nvngx_dlssg.sm86.dll",
+          "Target": "nvngx_dlssg.sm86.dll",
+          "Hash": "9de2a4480ca104d2bc91cfa3bee99ce6c70e3c9b6b102892d8073f9c76dde841",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "fg-bridge-provider",
+          "Component": "mfg2030"
+        },
+        {
+          "Source": "payload/exclusive/ReShade.ini",
+          "Target": "ReShade.ini",
+          "Hash": "8ae5fc0b0ccd4fef3131797c50e8b525fa9bb069ddb75e7b07b483526d8bf66f",
+          "Policy": "replace",
+          "Role": "config"
+        },
+        {
+          "Source": "payload/exclusive/dxgi.dll",
+          "Target": "dxgi.dll",
+          "Hash": "418e69676aa2168fcbffdde2e6409b4448e07507a007369e7b9dd8ed2bb7bf59",
+          "Policy": "replace",
+          "Role": "entry",
+          "Architecture": "x64",
+          "HostKind": "reshade-yanyun-v1"
+        },
+        {
+          "Source": "payload/exclusive/033-runtime/semantic/onnxruntime.dll",
+          "Target": "033-runtime/semantic/onnxruntime.dll",
+          "Hash": "8fba9fd33466c722a077731d46947d009ae20756b18977bb13158a29dd93d80a",
+          "Policy": "replace",
+          "Role": "semantic-runtime",
+          "Architecture": "x64"
+        },
+        {
+          "Source": "payload/exclusive/033-runtime/semantic/onnxruntime_providers_shared.dll",
+          "Target": "033-runtime/semantic/onnxruntime_providers_shared.dll",
+          "Hash": "6a95b8e65633a00e90e9c6e7f2b034708b82a58de79357e4e81bf0a06ed21145",
+          "Policy": "replace",
+          "Role": "semantic-runtime",
+          "Architecture": "x64"
+        },
+        {
+          "Source": "payload/exclusive/033-runtime/semantic/DirectML.dll",
+          "Target": "033-runtime/semantic/DirectML.dll",
+          "Hash": "9c9e6d822561c6c41b90e6994b3e8857cf1d66dbfb1e0c4c799c7c89b4e92da1",
+          "Policy": "replace",
+          "Role": "semantic-runtime",
+          "Architecture": "x64"
+        },
+        {
+          "Source": "payload/exclusive/033-runtime/semantic/yolo11n-seg.onnx",
+          "Target": "033-runtime/semantic/yolo11n-seg.onnx",
+          "Hash": "4fa0b870a6075e6e7fcb55fe5fe7cb10abc61c244a60fc2bbc563af28ee94f26",
+          "Policy": "replace",
+          "Role": "semantic-model"
+        },
+        {
+          "Source": "payload/exclusive/033-runtime/033-engine.dll",
+          "Target": "033-runtime/033-engine.dll",
+          "Hash": "3bf7d7f04c3c71929073e54f164759c85a7e1874be3b8191ac8d19d1a3bc28c0",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "engine"
+        },
+        {
+          "Source": "payload/exclusive/033-runtime/nvngx.dll_033.dll",
+          "Target": "033-runtime/nvngx.dll_033.dll",
+          "Hash": "7deb0f8842ec6ce2f2609d87adde87194270fa60519dca542eedde57da20ac5b",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "nr-forwarder"
+        },
+        {
+          "Source": "payload/exclusive/033-runtime/033-empty.ini",
+          "Target": "033-runtime/033-empty.ini",
+          "Hash": "f467e4dec1e2a30f3c5efb691677a05c04944e521396c823035ccca957e1e2f9",
+          "Policy": "seed",
+          "Role": "config"
+        },
+        {
+          "Source": "payload/crt-s3/concrt140.dll",
+          "Target": "033-runtime/concrt140.dll",
+          "Hash": "2405355f0a58067b258f8df33c327e3a3d716eaac5a3a5aebb757842d85bd376",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/msvcp140_1.dll",
+          "Target": "033-runtime/msvcp140_1.dll",
+          "Hash": "bfad5aef4c63a669e3c140655cdfdf395b6c979b400a447bd5dcb65ed8826c3d",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/msvcp140_2.dll",
+          "Target": "033-runtime/msvcp140_2.dll",
+          "Hash": "3ea06f0ee098b4823cb79599df3780e7f23cce52c19aac31d2a0d47efe33a5e9",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/msvcp140_codecvt_ids.dll",
+          "Target": "033-runtime/msvcp140_codecvt_ids.dll",
+          "Hash": "f2069a52880ec885ee7f0511186100eb7fada0411a2b4948fafea7735b878a18",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/vccorlib140.dll",
+          "Target": "033-runtime/vccorlib140.dll",
+          "Hash": "19839407c3fdbc824e5bce189bf68ddf8097f12ec28b757797ffa0415c144ddd",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/vcruntime140_threads.dll",
+          "Target": "033-runtime/vcruntime140_threads.dll",
+          "Hash": "219915cf20822f34d5e7c1fdd4e21ae7f3396881096c51036225fb8f84b47afa",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/msvcp140.dll",
+          "Target": "033-runtime/semantic/msvcp140.dll",
+          "Hash": "0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/msvcp140_atomic_wait.dll",
+          "Target": "033-runtime/semantic/msvcp140_atomic_wait.dll",
+          "Hash": "640b2aefced484d0368eea5bdd06addd0658a3a70a49256e560d6923b404a479",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/vcruntime140.dll",
+          "Target": "033-runtime/semantic/vcruntime140.dll",
+          "Hash": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/vcruntime140_1.dll",
+          "Target": "033-runtime/semantic/vcruntime140_1.dll",
+          "Hash": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/concrt140.dll",
+          "Target": "033-runtime/semantic/concrt140.dll",
+          "Hash": "2405355f0a58067b258f8df33c327e3a3d716eaac5a3a5aebb757842d85bd376",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/msvcp140_1.dll",
+          "Target": "033-runtime/semantic/msvcp140_1.dll",
+          "Hash": "bfad5aef4c63a669e3c140655cdfdf395b6c979b400a447bd5dcb65ed8826c3d",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/msvcp140_2.dll",
+          "Target": "033-runtime/semantic/msvcp140_2.dll",
+          "Hash": "3ea06f0ee098b4823cb79599df3780e7f23cce52c19aac31d2a0d47efe33a5e9",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/msvcp140_codecvt_ids.dll",
+          "Target": "033-runtime/semantic/msvcp140_codecvt_ids.dll",
+          "Hash": "f2069a52880ec885ee7f0511186100eb7fada0411a2b4948fafea7735b878a18",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/vccorlib140.dll",
+          "Target": "033-runtime/semantic/vccorlib140.dll",
+          "Hash": "19839407c3fdbc824e5bce189bf68ddf8097f12ec28b757797ffa0415c144ddd",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/vcruntime140_threads.dll",
+          "Target": "033-runtime/semantic/vcruntime140_threads.dll",
+          "Hash": "219915cf20822f34d5e7c1fdd4e21ae7f3396881096c51036225fb8f84b47afa",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/exclusive/033-runtime/semantic/033-person-worker.exe",
+          "Target": "033-runtime/semantic/033-person-worker.exe",
+          "Hash": "ff9f40dc249ccf6642a485a14d58d8f569a6d3645d0b6a8e1e123f91e034be11",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "semantic-worker"
+        }
+      ],
+      "Protocol": "033 燕云定制版：前置 / SR / NR / FG，全局或人物 / 场景分开调节。",
+      "RuntimeFiles": [
+        "ReShade.log",
+        "033-runtime/dlss5-feed.log",
+        "033-runtime/dlss5-feed.cfg",
+        "033-runtime/dlss5-033.log",
+        "033-runtime/dlss5-033.cfg",
+        "033-framegen.log",
+        "033-monitor.cfg",
+        "dlss5-033.log",
+        "dlss5-033.state"
+      ],
+      "RuntimeDirectories": [
+        "033-runtime"
+      ],
+      "ExecutableNames": [
+        "yysls.exe"
+      ],
+      "Suitability": {
+        "Apis": [
+          "dx12"
+        ],
+        "NativeUpscaler": "present",
+        "ProductLine": "native-mount",
+        "Dx12Runtime": "any",
+        "AlternateProductHint": "此包为燕云十六声专用，与通用版分别构建和维护。",
+        "RequiredDlls": []
+      },
+      "Components": {
+        "mfg2030": {
+          "Label": "多帧转接件 nvidia_mfg_bridge v0.504",
+          "GpuGenerations": [
+            20,
+            30
+          ],
+          "GameFrameGen": "present",
+          "LoaderRole": "fg-bridge-loader",
+          "LoaderNames": [
+            "version.dll",
+            "winhttp.dll",
+            "dbghelp.dll",
+            "cryptsp.dll",
+            "XINPUT9_1_0.dll",
+            "IPHLPAPI.dll"
+          ],
+          "RuntimeFiles": [
+            "dlssg_to_fsr3.log",
+            "dlssg_dxgi_debug.log"
+          ],
+          "RequiredDlls": [
+            "MSVCP140.dll",
+            "VCRUNTIME140.dll",
+            "VCRUNTIME140_1.dll",
+            "D3DCOMPILER_47.dll"
+          ]
+        }
+      }
+    }
+  ],
+  "Version": "B站@热心网友033-燕云定制版-V6.2",
+  "Notices": [
+    {
+      "Source": "notices/bundled/FaceDetect033/LICENSE",
+      "Hash": "95b286c39b1444594e18672e6092321e39cc11f2f1daf994cadfd95af7c91dcc"
+    },
+    {
+      "Source": "notices/bundled/FramePacing033/033-framegen-LICENSE.md",
+      "Hash": "1afc482faec993fadf8478b5b2f8f026d93869a7992624cd1e97c898a16b12b6"
+    },
+    {
+      "Source": "notices/bundled/GPUPixel033/LICENSE",
+      "Hash": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "Source": "notices/bundled/GPUPixel033/NOTICE.txt",
+      "Hash": "7ca954b0a187eaa37643420eba2ad5cfad1659133daae40c36f09939c8b53d61"
+    },
+    {
+      "Source": "notices/bundled/OptiScaler/external/directx_agility_sdk/LICENSE.txt",
+      "Hash": "5239850894610071566f7ecee0b751fde43c862032d92b99d7d0f596b3433ebd"
+    },
+    {
+      "Source": "notices/bundled/OptiScaler/external/FidelityFX-SDK/dx12/license.txt",
+      "Hash": "f47a55fc1b4fff0e485a4e88af3d14834c05b96f84be28ed86e5541244fea355"
+    },
+    {
+      "Source": "notices/bundled/OptiScaler/external/FidelityFX-SDK/LICENSE.txt",
+      "Hash": "c93d509cd69d50698796c9c3274247352736ef122a3197ace2010f0978e21aa6"
+    },
+    {
+      "Source": "notices/bundled/OptiScaler/external/FidelityFX-SDK/sdk/LICENSE.txt",
+      "Hash": "c93d509cd69d50698796c9c3274247352736ef122a3197ace2010f0978e21aa6"
+    },
+    {
+      "Source": "notices/bundled/OptiScaler/external/FidelityFX-SDK/tools/MD5/LICENSE",
+      "Hash": "859b90d3cf20c97ecb6446832021a6176e707ac82efb9d49cc8709394cebe053"
+    },
+    {
+      "Source": "notices/bundled/OptiScaler/external/FidelityFX-SDK/tools/SPIRV-Reflect/LICENSE",
+      "Hash": "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6"
+    },
+    {
+      "Source": "notices/bundled/OptiScaler/external/FidelityFX-SDK/tools/tiny-process-library/LICENSE",
+      "Hash": "81fbfd6aef77b2672d238874a78122e63c7b43d8cf5d8c936760f5f1e50b6ae3"
+    },
+    {
+      "Source": "notices/bundled/OptiScaler/external/FidelityFX-SDK-v2/amd/acs/LICENSE.txt",
+      "Hash": "5c813072b64c6a84d50339660b205c8497a104231deab93e88ee963538387df5"
+    },
+    {
+      "Source": "notices/bundled/OptiScaler/external/FidelityFX-SDK-v2/amd/ags/LICENSE.txt",
+      "Hash": "975c6be76e0bd7ea68819cda55c1b108ee83dfa69c10412167d1e6fa6c397c42"
+    },
+    {
+      "Source": "notices/bundled/OptiScaler/external/FidelityFX-SDK-v2/amd/antilag2/LICENSE.txt",
+      "Hash": "bab861253b4ecf6f8f0515cc828297a9b6e4be967704ab6bbaecdf18c70e1c25"
+    },
+    {
+      "Source": "notices/bundled/OptiScaler/external/FidelityFX-SDK-v2/amd/memoryallocator/license.txt",
+      "Hash": "35fb848ae404cf25e94b107c2bb0c18b86b076fc0e18eda9974df3d34abd87bc"
+    },
+    {
+      "Source": "notices/bundled/OptiScaler/external/FidelityFX-SDK-v2/imgui/LICENSE.txt",
+      "Hash": "55e058cc5899e6077a819ad1005d6d1f4528f65ae100795c9692f9fa6525a8ce"
+    },
+    {
+      "Source": "notices/bundled/OptiScaler/external/FidelityFX-SDK-v2/nlohmann/LICENSE.MIT",
+      "Hash": "6f48a03625699eea99e599744efea0bf9c9dd67a669e65554df1cd726b8a2477"
+    },
+    {
+      "Source": "notices/bundled/OptiScaler/external/FidelityFX-SDK-v2/stb/LICENSE.MIT",
+      "Hash": "a042ba7f8ec719e1fd4e03c1f175830e7ee456eb67634a9633d8bd0136500ad2"
+    },
+    {
+      "Source": "notices/bundled/OptiScaler/external/FidelityFX-SDK-v2/vectormath/LICENSE.txt",
+      "Hash": "f752699a99106a2cd194602adda6fcdbd1e2314c072fa08e548f4bc6d4c6e6d0"
+    },
+    {
+      "Source": "notices/bundled/OptiScaler/external/magic_enum/cmake/GenPkgConfig/UNLICENSE",
+      "Hash": "f0197bed41a53bde53baed458d3cea00fafe514fc0d755c141d3dcb75f84dea1"
+    },
+    {
+      "Source": "notices/bundled/OptiScaler/external/magic_enum/LICENSE",
+      "Hash": "807abee0c36b11f5d64c5c2652129b84b41cc9f8f9b8d324e0e53290b2542956"
+    },
+    {
+      "Source": "notices/bundled/OptiScaler/external/simpleini/LICENCE.txt",
+      "Hash": "cf85640c89c76dfa913f83c7c8f02682f307833c5955763bca9ca6e27051f213"
+    },
+    {
+      "Source": "notices/bundled/OptiScaler/external/spdlog/LICENSE",
+      "Hash": "4ccecab18d1ff0b61174fe3d6c430541625d3ddb865b0d5887db296f883c76e7"
+    },
+    {
+      "Source": "notices/bundled/OptiScaler/external/unordered_dense/LICENSE",
+      "Hash": "55284952bd483a64a38f48069796b813da1085f1360d8d59cfbef6cce802868e"
+    },
+    {
+      "Source": "notices/bundled/OptiScaler/external/vulkan/LICENSE.md",
+      "Hash": "f43ba543d73f08f7401d99b697b2b741704eb22b5447a5021fd92b279b297646"
+    },
+    {
+      "Source": "notices/bundled/OptiScaler/Licenses/RenoDX_ATTRIBUTION.txt",
+      "Hash": "1d2f2b2f8cf5c9acfe2eaaa2d2c22face87bd19f7df85453079a28e7123ae727"
+    },
+    {
+      "Source": "notices/bundled/OptiScaler/OptiScaler/include/imgui/LICENSE.txt",
+      "Hash": "55e058cc5899e6077a819ad1005d6d1f4528f65ae100795c9692f9fa6525a8ce"
+    },
+    {
+      "Source": "notices/bundled/ReShade-deps/d3d12on7/LICENSE.txt",
+      "Hash": "db7f7695c04c02150be7ef961a106120e7cb516584ce6bcf9e14dc4907851887"
+    },
+    {
+      "Source": "notices/bundled/ReShade-deps/d3d911on12/LICENSE.txt",
+      "Hash": "fd532481d828e13a0b13ccb598e02338a3617740675a862ee6bdc1541b68e93d"
+    },
+    {
+      "Source": "notices/bundled/ReShade-deps/glad/LICENSE",
+      "Hash": "cbb325cd4ac5bd06717ffa34a322b984f9d285e4c67c8ca1b7380d6ef08c2a77"
+    },
+    {
+      "Source": "notices/bundled/ReShade-deps/imgui/LICENSE.txt",
+      "Hash": "c80c5789748d955c4a650562baa0d750494e2c7128c2ca66aaebe2e3c4e198bf"
+    },
+    {
+      "Source": "notices/bundled/ReShade-deps/jxl_simple_lossless/LICENSE",
+      "Hash": "8405932022a556380c2d8c272eff154a923feb197233f348ce5f7334fb0a5ede"
+    },
+    {
+      "Source": "notices/bundled/ReShade-deps/minhook/LICENSE.txt",
+      "Hash": "d5c2224982b0b95a16b098a561335fa93f3eaf4d0aa964b7843edb986df78dc8"
+    },
+    {
+      "Source": "notices/bundled/ReShade-deps/openvr/LICENSE",
+      "Hash": "f56ff606104d4ef18e617921a75c73ad73b5a1a1d70c69590c29de16919e04ad"
+    },
+    {
+      "Source": "notices/bundled/ReShade-deps/openxr/COPYING.adoc",
+      "Hash": "56e17fd90cc5ff1d930db979bfbfcffeb7f311a57068f435e14e4f0548b3a4fc"
+    },
+    {
+      "Source": "notices/bundled/ReShade-deps/openxr/jnipp/LICENSE",
+      "Hash": "3f46b895fbd843c7abe5b49fa0b699a5093fc8b345940a7c587948c57cc8f270"
+    },
+    {
+      "Source": "notices/bundled/ReShade-deps/openxr/jsoncpp/LICENSE",
+      "Hash": "cec0db5f6d7ed6b3a72647bd50aed02e13c3377fd44382b96dc2915534c042ad"
+    },
+    {
+      "Source": "notices/bundled/ReShade-deps/openxr/LICENSE",
+      "Hash": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "Source": "notices/bundled/ReShade-deps/openxr/LICENSES/Unlicense.txt",
+      "Hash": "567675401b124cc8ed1095665474a4f04ce1ed44134ee7eec46a691e387a1397"
+    },
+    {
+      "Source": "notices/bundled/ReShade-deps/spirv/LICENSE",
+      "Hash": "9b243f6f0bf44e295ff411a0f7b7642d1d0dff7cdc42507e9f7206f439e51b5a"
+    },
+    {
+      "Source": "notices/bundled/ReShade-deps/stb/LICENSE",
+      "Hash": "bebfe904b14301657e4e5d655c811d51fd31b97c455b9cc2d8600d6bac6cff63"
+    },
+    {
+      "Source": "notices/bundled/ReShade-deps/utfcpp/LICENSE",
+      "Hash": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566"
+    },
+    {
+      "Source": "notices/bundled/ReShade-deps/vma/LICENSE.txt",
+      "Hash": "8d70e4cf2a9941f6454da71cd60e38484dd3e34810c824760d550e982af6d97a"
+    },
+    {
+      "Source": "notices/bundled/semantic/onnxruntime/LICENSE",
+      "Hash": "2f07c72751aed99790b8a4869cf2311df85a860b22ded05fa22803587a48922c"
+    },
+    {
+      "Source": "notices/bundled/semantic/onnxruntime/ThirdPartyNotices.txt",
+      "Hash": "0e07b95f3a8d6230037707c5c4a2b554d12c4cb67369669ac255635528ffcee2"
+    },
+    {
+      "Source": "notices/Detours/LICENSE.txt",
+      "Hash": "164547374a14d679304509dfc541c62112f12aff8c7aa2fffd50b3870179a72c"
+    },
+    {
+      "Source": "notices/DirectML/LICENSE-CODE.txt",
+      "Hash": "903df5512f7d02609fed0c780a9b704f5a3eeb6e4d84ebe42a29845c81899a3c"
+    },
+    {
+      "Source": "notices/DirectML/LICENSE.txt",
+      "Hash": "a05138e3a085ff60a44881eedfa58dccb03ecc1d7b1f6ae888418e8c2fec4b8d"
+    },
+    {
+      "Source": "notices/DXL/033-CHANGES.md",
+      "Hash": "d5bf7b74db981a1961223a46dbb202b6eb1d51acb2cd9e90651411415815fdca"
+    },
+    {
+      "Source": "notices/DXL/LICENSE",
+      "Hash": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0"
+    },
+    {
+      "Source": "notices/FaceDetect/LICENSE",
+      "Hash": "95b286c39b1444594e18672e6092321e39cc11f2f1daf994cadfd95af7c91dcc"
+    },
+    {
+      "Source": "notices/FaceDetect/SOURCE.txt",
+      "Hash": "a962d5a41795b702f4e1f64f6290f2d3a3db01b6b0943330f8e6fea1ad215392"
+    },
+    {
+      "Source": "notices/Feeder-LICENSE",
+      "Hash": "1ce240e402901fb81eb82a60a6bafd2fb913cd5746860b0a4ec52a5acb49ced7"
+    },
+    {
+      "Source": "notices/FidelityFX-CAS/LICENSE.txt",
+      "Hash": "81021744cc01a0728e88ec082d7f82f571b8a14e0847ff85d666d8be71eb7323"
+    },
+    {
+      "Source": "notices/FramePacing/LICENSE.md",
+      "Hash": "1afc482faec993fadf8478b5b2f8f026d93869a7992624cd1e97c898a16b12b6"
+    },
+    {
+      "Source": "notices/FreeType/NOTICE.txt",
+      "Hash": "b70e22d507250aba6e9fd3fc394036d3e280a48cd16d75f8458087cd424a1aa3"
+    },
+    {
+      "Source": "notices/GPUPixel/LICENSE",
+      "Hash": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "Source": "notices/GPUPixel/NOTICE.txt",
+      "Hash": "7ca954b0a187eaa37643420eba2ad5cfad1659133daae40c36f09939c8b53d61"
+    },
+    {
+      "Source": "notices/GPUPixel/SOURCE.json",
+      "Hash": "2178ea993533239a821d9ef3302182fb1c34bcaedc76877a37681ac66b99c6ab"
+    },
+    {
+      "Source": "notices/InsaneShaders033/LICENSE",
+      "Hash": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499"
+    },
+    {
+      "Source": "notices/InsaneShaders033/SOURCE.md",
+      "Hash": "2b34e6bf32748846239467c329f89421f47f590256c7a7accf6867a85a7b8cb4"
+    },
+    {
+      "Source": "notices/Intel-XeSS/LICENSE.txt",
+      "Hash": "784be42c39a4a4d03cf85d88e15e59d75828fca773ce45b8dbfffbd7eaf208df"
+    },
+    {
+      "Source": "notices/Intel-XeSS/SOURCE.json",
+      "Hash": "1e4f45da2266ac9da8ba598012f7a2f6d71342ec75c7ab42c3e104c0308f8d72"
+    },
+    {
+      "Source": "notices/MFG-Unlock/LICENSE.txt",
+      "Hash": "4ce922ecb6aa4b60d24f63f6241f0436e960a00989d71c68e2eb81ecc3d718fd"
+    },
+    {
+      "Source": "notices/MSVC/Redist.txt",
+      "Hash": "da53b097e02b08e0fc69706102a60bc384fe756426ae4dc4a855e96f95cb2b9c"
+    },
+    {
+      "Source": "notices/MSVC/ThirdPartyNotices.txt",
+      "Hash": "782815bd1256f9ad798211eee4b0e574ddd113bd07700c6921ab25c591fbcda7"
+    },
+    {
+      "Source": "notices/NVAPI/License.txt",
+      "Hash": "4276d61aeab3d8912ba64123209147c4a0c4fb5d191cc5df1072b1799a06f8e9"
+    },
+    {
+      "Source": "notices/nvidia-ngx/LICENSE.txt",
+      "Hash": "3027f23ca5a46dd9cb8183fbd522983a86f64d7daac5982912bf9f214671f294"
+    },
+    {
+      "Source": "notices/nvidia_mfg_bridge/dlssg-to-fsr3-LICENSE.md",
+      "Hash": "4d3e484b968368a852c26842b8f57f3c757c96de01194119603ec9b591d2c8d7"
+    },
+    {
+      "Source": "notices/nvidia_mfg_bridge/README.txt",
+      "Hash": "a7a7bfe7312748b59ab7881055c5fc440bb42ea8b8857e1add95616ab3f8588d"
+    },
+    {
+      "Source": "notices/nvidia_mfg_bridge/SOURCE.json",
+      "Hash": "6af5699b61f1566def615fde770f906dbcdb0c18d28836e979b54ed122520c1c"
+    },
+    {
+      "Source": "notices/ONNXRuntime/LICENSE",
+      "Hash": "c250d6278f0b47a6439fb7592b08b58a55eb9f535aa49a1db63211c3f982b674"
+    },
+    {
+      "Source": "notices/ONNXRuntime/ThirdPartyNotices.txt",
+      "Hash": "fb0af774b4d7cffc5b9d046f2aaeade2f37df2f80abf8033c95dfffcc77a8866"
+    },
+    {
+      "Source": "notices/OptiScaler/LICENSE",
+      "Hash": "230184f60bae2feaf244f10a8bac053c8ff33a183bcc365b4d8b876d2b7f4809"
+    },
+    {
+      "Source": "notices/ReShade/LICENSE.md",
+      "Hash": "237ded5b8344f820113efab1e65e91e1f159d9202c5b4856606a0590d3ffdab0"
+    },
+    {
+      "Source": "notices/Streamline/3rd-party-licenses.md",
+      "Hash": "cb251639994465f31d2178c16acedf1ff4f9cef1c370a09782ed36d4c86c1dca"
+    },
+    {
+      "Source": "notices/Streamline/license.txt",
+      "Hash": "7b6f23e7d6f3ad6292f9308d2b42cdc3d82ae4e9b2abb55f230279d83bedd43d"
+    },
+    {
+      "Source": "notices/Streamline/reflex.license.txt",
+      "Hash": "ebf83c07fb3b2939908c3795d887afde3161c89a28ba391724efc784ce1bdabe"
+    },
+    {
+      "Source": "notices/THIRD_PARTY_NOTICES.md",
+      "Hash": "29b507f463b9e98fbff0537ee051b8bce948193c529b1c220f7729c90cbce02d"
+    },
+    {
+      "Source": "notices/YOLO11/LICENSE",
+      "Hash": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0"
+    },
+    {
+      "Source": "notices/YOLO11/MODEL-CONVERSION.md",
+      "Hash": "d3ed42acb66444600a805de5942264e191812138539ea734a8345a6fbe36981b"
+    },
+    {
+      "Source": "notices/YOLO11/MODEL-README.md",
+      "Hash": "37646c8b7579cb982fee7870cd67d725cbedbf055487b9e69d0a3ba6d5deff1d"
+    },
+    {
+      "Source": "notices/YOLO11/MODEL-SOURCES.json",
+      "Hash": "f1e5ecf263b73c467b81babb26606f48492dfc3117013b57e0869351058865fd"
+    }
+  ],
+  "Schema": 1,
+  "Kind": "033-managed-package",
+  "ReleaseContract": {
+    "Schema": 1,
+    "Source": "033-components.json",
+    "Hash": "e9c74243abd08f5f64cb8ac7f277422c5f21f4697b87194387d8d7c6db0659c2"
+  }
+}

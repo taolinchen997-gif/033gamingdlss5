@@ -1,0 +1,74 @@
+{
+  "component": "nvidia_mfg_bridge 0.504",
+  "author": "gt2333588; based on Nukem9 dlssg-to-fsr3",
+  "release": "https://github.com/gt2333588/nvidia_mfg_bridge/releases/tag/v0.504",
+  "fetch": {
+    "tag": "v0.504",
+    "url": "https://github.com/gt2333588/nvidia_mfg_bridge/releases/download/v0.504/nvidia_mfg_bridge.7z",
+    "archiveSHA256": "7ac947b4d6e9e55dc6c91dc190a2754347d3aa7cbd9dc711634540541cf75f7f",
+    "matchedGitHubDigest": true,
+    "files": [
+      {
+        "path": "dlssg_to_fsr3.ini",
+        "bytes": 6689,
+        "sha256": "a392a53c6f71c5dafa42c822c1826b4d9091bd14c0d1e0b56aca4b68fbc738e2"
+      },
+      {
+        "path": "nvngx.dll",
+        "bytes": 208398848,
+        "sha256": "01204ac77840de5dcfee8c477beabdb58d8c6551c262f05e5efdf66d5f784d2a"
+      },
+      {
+        "path": "README.txt",
+        "bytes": 11111,
+        "sha256": "a7a7bfe7312748b59ab7881055c5fc440bb42ea8b8857e1add95616ab3f8588d"
+      }
+    ]
+  },
+  "embeddedResources": [
+    {
+      "path": "10/DLSSG_DLSSNR_SM86/1033",
+      "rva": 42575600,
+      "bytes": 165840496,
+      "head": "4d5a90000300000004000000ffff0000b8000000000000004000000000000000",
+      "sha256": "ac3c3bc5abbc99688a4d3e68effdd7a1ef0a0c0e1874dee89ac75ee33874c5fa"
+    },
+    {
+      "path": "10/DLSSG_PROVIDER_SM75/1033",
+      "rva": 11741824,
+      "bytes": 7460976,
+      "head": "4d5a90000300000004000000ffff0000b8000000000000004000000000000000",
+      "sha256": "08136c4756be2ae4d4be88a971b9ac0830b978beb15f5721390a228d53511c63"
+    },
+    {
+      "path": "10/DLSSG_PROVIDER_SM86/1033",
+      "rva": 4280848,
+      "bytes": 7460976,
+      "head": "4d5a90000300000004000000ffff0000b8000000000000004000000000000000",
+      "sha256": "9de2a4480ca104d2bc91cfa3bee99ce6c70e3c9b6b102892d8073f9c76dde841"
+    },
+    {
+      "path": "10/DLSSG_XELL/1033",
+      "rva": 42160232,
+      "bytes": 415368,
+      "head": "4d5a90000300000004000000ffff0000b8000000000000004000000000000000",
+      "sha256": "d2030dcd694fda8f2ec7e044b13e6db8f0b56d4ba9113a5efad334e3f3ded8c7"
+    },
+    {
+      "path": "10/DLSSG_XESS_FG/1033",
+      "rva": 19202800,
+      "bytes": 22957432,
+      "head": "4d5a90000300000004000000ffff0000b8000000000000004000000000000000",
+      "sha256": "ec5e0c65e075570c6ede72618bb666d0be0c2e10b2ea9762c0fe8cb8e375ab27"
+    },
+    {
+      "path": "24/2/1033",
+      "rva": 208416096,
+      "bytes": 381,
+      "head": "3c3f786d6c2076657273696f6e3d27312e302720656e636f64696e673d275554",
+      "sha256": "4bb79dcea0a901f7d9eac5aa05728ae92acb42e0cb22e5dd14134f4421a3d8df"
+    }
+  ],
+  "executed": false,
+  "notes": "Binary-only upstream. SM75/SM86 modified NVIDIA runtimes remain under NVIDIA terms. Intel licenses retained. Third-party NR disabled; live callbacks are pinned by full file SHA and mapped bytes. Actual game/hardware stability unaccepted."
+}

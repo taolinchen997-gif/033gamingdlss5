@@ -1,0 +1,26 @@
+{
+  "repository": "https://github.com/pixpark/gpupixel",
+  "commit": "5415b738817553f339620b89ea755bdbfe44e166",
+  "files": [
+    {
+      "name": "beauty_face_filter.cc",
+      "sha256": "56a3063b8a25cde359a7d6b0b1490d2acbdecc8a0dea5d55c4817a5dfa5890f9"
+    },
+    {
+      "name": "beauty_face_unit_filter.cc",
+      "sha256": "cab31f3c7ff9212df8a93c402e9b2bd615711a16ed7ee0016b4dfce66f2102a2"
+    },
+    {
+      "name": "box_blur_filter.cc",
+      "sha256": "d53f090c8af446df99775ad353225eac41c4aba7bfd2669dc3c82927617a8e83"
+    },
+    {
+      "name": "box_high_pass_filter.cc",
+      "sha256": "bfc338a38c310819ac29fb55596ab810987e2bee783ddc1f43059521c81a55cc"
+    },
+    {
+      "name": "LICENSE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    }
+  ]
+}

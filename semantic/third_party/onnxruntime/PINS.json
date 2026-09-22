@@ -1,0 +1,49 @@
+{
+  "source": "https://api.github.com/repos/microsoft/onnxruntime",
+  "tag": "v1.24.3",
+  "commit": "3a728b75062256951b6e19ce718907cf1a1d4cf0",
+  "files": [
+    {
+      "path": "include/onnxruntime/core/session/onnxruntime_c_api.h",
+      "gitBlob": "6ae1539d4c294c8785b78fdcf2241dde93a35372",
+      "sha256": "9ed0d7054a4e74249467365b25b415d36f51a44a6349e2a994a1812e4723d1e2",
+      "bytes": 373908
+    },
+    {
+      "path": "include/onnxruntime/core/session/onnxruntime_ep_c_api.h",
+      "gitBlob": "b888d0d609e552e074cbec7783ce552b1a610ef4",
+      "sha256": "e94ac3490697bdb107844fa9d403952ee7136134132a057eae5c1207b57ce352",
+      "bytes": 102494
+    },
+    {
+      "path": "include/onnxruntime/core/session/onnxruntime_cxx_api.h",
+      "gitBlob": "5cf8cf88bb05479514bc75c517121ad3f54caddd",
+      "sha256": "5eb8809db561261210ffcafcf9823873f0603fd799542797b6b728bb3f75e5f6",
+      "bytes": 156761
+    },
+    {
+      "path": "include/onnxruntime/core/session/onnxruntime_cxx_inline.h",
+      "gitBlob": "1a3e49130a1d16e87f625028b0ccbbfb1c3ead53",
+      "sha256": "022f4559009a35b157bc05a1aae9a59a2603a17e535d9410a49d0f9187f18039",
+      "bytes": 144392
+    },
+    {
+      "path": "include/onnxruntime/core/session/onnxruntime_float16.h",
+      "gitBlob": "625a1e82a6504577da24e83074643f7dfc13303d",
+      "sha256": "88b242845d25981633a0bbd1c148e273cf8bfb016ea3f57c4af41a06530f72b0",
+      "bytes": 17991
+    },
+    {
+      "path": "LICENSE",
+      "gitBlob": "48bc6bb4996ac924359e8e28b9ae88970e5ed3fc",
+      "sha256": "2f07c72751aed99790b8a4869cf2311df85a860b22ded05fa22803587a48922c",
+      "bytes": 1073
+    },
+    {
+      "path": "ThirdPartyNotices.txt",
+      "gitBlob": "fbd9f9a95f6013d8ecaef81e02b0033e5882a675",
+      "sha256": "0e07b95f3a8d6230037707c5c4a2b554d12c4cb67369669ac255635528ffcee2",
+      "bytes": 325054
+    }
+  ]
+}

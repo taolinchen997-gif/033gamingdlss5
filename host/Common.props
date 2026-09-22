@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions>K033_BETA2_RESHADE_HOST=1;_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <PropertyGroup>
+    <OutDir>$(K033OutputRoot)bin\$(Platform)\</OutDir>
+    <IntDir>$(K033OutputRoot)obj\$(ProjectName)\$(Platform)\</IntDir>
+  </PropertyGroup>
+</Project>

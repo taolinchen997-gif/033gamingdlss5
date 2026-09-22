@@ -1,0 +1,27 @@
+1 VERSIONINFO
+ FILEVERSION 0,9,9,0
+ PRODUCTVERSION 0,9,9,0
+ FILEFLAGSMASK 0x3fL
+ FILEFLAGS 0x0L
+ FILEOS 0x40004L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "CompanyName", "OptiScaler test fixture\0"
+            VALUE "FileDescription", "OptiScaler ownership detector test fixture\0"
+            VALUE "FileVersion", "0.9.9.0\0"
+            VALUE "InternalName", "OptiScaler\0"
+            VALUE "OriginalFilename", "OptiScaler.dll\0"
+            VALUE "ProductName", "OptiScaler test fixture\0"
+            VALUE "ProductVersion", "0.9.9.0\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0409, 1252
+    END
+END

@@ -1,0 +1,1 @@
+https://github.com/ShiqiYu/libfacedetection commit acf7b254121927e7dced30e233a2e03119f28ea2; unmodified src files; BSD-3-Clause; CPU detector statically linked into 033.

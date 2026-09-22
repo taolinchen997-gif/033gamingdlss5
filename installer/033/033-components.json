@@ -1,0 +1,367 @@
+{
+  "Schema": 1,
+  "Release": "B站@热心网友033-燕云定制版-V6.2",
+  "Profiles": {
+    "yanyun-exclusive-x64": {
+      "Family": "yanyun-native-s4",
+      "Files": [
+        {
+          "Source": "payload/host64/033-runtime/nvngx_dlssnr.dll",
+          "Target": "033-runtime/nvngx_dlssnr.dll",
+          "Hash": "6eb209e764f39872625debd6abaf45e2bb6322f6f270f781f70c059ae30b3927",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "model"
+        },
+        {
+          "Source": "payload/crt-s3/msvcp140.dll",
+          "Target": "033-runtime/msvcp140.dll",
+          "Hash": "0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/msvcp140_atomic_wait.dll",
+          "Target": "033-runtime/msvcp140_atomic_wait.dll",
+          "Hash": "640b2aefced484d0368eea5bdd06addd0658a3a70a49256e560d6923b404a479",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/vcruntime140.dll",
+          "Target": "033-runtime/vcruntime140.dll",
+          "Hash": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/vcruntime140_1.dll",
+          "Target": "033-runtime/vcruntime140_1.dll",
+          "Hash": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/seeds/native/dlss5-033.cfg",
+          "Target": "dlss5-033.cfg",
+          "Hash": "898abc82be45784f9d0ebc0f36933493af674459fe8cf56c6003be41cf5ff1c5",
+          "Architecture": null,
+          "Policy": "seed",
+          "Role": "config"
+        },
+        {
+          "Source": "payload/mfg2030/nvngx.dll",
+          "Target": "version.dll",
+          "Hash": "01204ac77840de5dcfee8c477beabdb58d8c6551c262f05e5efdf66d5f784d2a",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "fg-bridge-loader",
+          "Component": "mfg2030"
+        },
+        {
+          "Source": "payload/mfg2030/dlssg_to_fsr3.ini",
+          "Target": "dlssg_to_fsr3.ini",
+          "Hash": "b22781dca2b0252139c91ce4cff75dcbd4f0dd73a08085e292329a918a02d9a2",
+          "Architecture": null,
+          "Policy": "seed",
+          "Role": "fg-bridge-config",
+          "Component": "mfg2030",
+          "SeedMerge": "033-mfg-v1"
+        },
+        {
+          "Source": "payload/unified-u1/seeds/033-monitor.cfg",
+          "Target": "033-monitor.cfg",
+          "Hash": "c7a20fd92acfbfc6ffdf4f659184e329a280a8de0532019f13b47d9f5c432fc1",
+          "Architecture": null,
+          "Policy": "seed",
+          "Role": "monitor-config"
+        },
+        {
+          "Source": "payload/mfg2030/nvngx_dlssg.sm75.dll",
+          "Target": "nvngx_dlssg.sm75.dll",
+          "Hash": "08136c4756be2ae4d4be88a971b9ac0830b978beb15f5721390a228d53511c63",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "fg-bridge-provider",
+          "Component": "mfg2030"
+        },
+        {
+          "Source": "payload/mfg2030/nvngx_dlssg.sm86.dll",
+          "Target": "nvngx_dlssg.sm86.dll",
+          "Hash": "9de2a4480ca104d2bc91cfa3bee99ce6c70e3c9b6b102892d8073f9c76dde841",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "fg-bridge-provider",
+          "Component": "mfg2030"
+        },
+        {
+          "Source": "payload/exclusive/ReShade.ini",
+          "Target": "ReShade.ini",
+          "Hash": "8ae5fc0b0ccd4fef3131797c50e8b525fa9bb069ddb75e7b07b483526d8bf66f",
+          "Policy": "replace",
+          "Role": "config"
+        },
+        {
+          "Source": "payload/exclusive/dxgi.dll",
+          "Target": "dxgi.dll",
+          "Hash": "418e69676aa2168fcbffdde2e6409b4448e07507a007369e7b9dd8ed2bb7bf59",
+          "Policy": "replace",
+          "Role": "entry",
+          "Architecture": "x64",
+          "HostKind": "reshade-yanyun-v1"
+        },
+        {
+          "Source": "payload/exclusive/033-runtime/semantic/onnxruntime.dll",
+          "Target": "033-runtime/semantic/onnxruntime.dll",
+          "Hash": "8fba9fd33466c722a077731d46947d009ae20756b18977bb13158a29dd93d80a",
+          "Policy": "replace",
+          "Role": "semantic-runtime",
+          "Architecture": "x64"
+        },
+        {
+          "Source": "payload/exclusive/033-runtime/semantic/onnxruntime_providers_shared.dll",
+          "Target": "033-runtime/semantic/onnxruntime_providers_shared.dll",
+          "Hash": "6a95b8e65633a00e90e9c6e7f2b034708b82a58de79357e4e81bf0a06ed21145",
+          "Policy": "replace",
+          "Role": "semantic-runtime",
+          "Architecture": "x64"
+        },
+        {
+          "Source": "payload/exclusive/033-runtime/semantic/DirectML.dll",
+          "Target": "033-runtime/semantic/DirectML.dll",
+          "Hash": "9c9e6d822561c6c41b90e6994b3e8857cf1d66dbfb1e0c4c799c7c89b4e92da1",
+          "Policy": "replace",
+          "Role": "semantic-runtime",
+          "Architecture": "x64"
+        },
+        {
+          "Source": "payload/exclusive/033-runtime/semantic/yolo11n-seg.onnx",
+          "Target": "033-runtime/semantic/yolo11n-seg.onnx",
+          "Hash": "4fa0b870a6075e6e7fcb55fe5fe7cb10abc61c244a60fc2bbc563af28ee94f26",
+          "Policy": "replace",
+          "Role": "semantic-model"
+        },
+        {
+          "Source": "payload/exclusive/033-runtime/033-engine.dll",
+          "Target": "033-runtime/033-engine.dll",
+          "Hash": "3bf7d7f04c3c71929073e54f164759c85a7e1874be3b8191ac8d19d1a3bc28c0",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "engine"
+        },
+        {
+          "Source": "payload/exclusive/033-runtime/nvngx.dll_033.dll",
+          "Target": "033-runtime/nvngx.dll_033.dll",
+          "Hash": "7deb0f8842ec6ce2f2609d87adde87194270fa60519dca542eedde57da20ac5b",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "nr-forwarder"
+        },
+        {
+          "Source": "payload/exclusive/033-runtime/033-empty.ini",
+          "Target": "033-runtime/033-empty.ini",
+          "Hash": "f467e4dec1e2a30f3c5efb691677a05c04944e521396c823035ccca957e1e2f9",
+          "Policy": "seed",
+          "Role": "config"
+        },
+        {
+          "Source": "payload/crt-s3/concrt140.dll",
+          "Target": "033-runtime/concrt140.dll",
+          "Hash": "2405355f0a58067b258f8df33c327e3a3d716eaac5a3a5aebb757842d85bd376",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/msvcp140_1.dll",
+          "Target": "033-runtime/msvcp140_1.dll",
+          "Hash": "bfad5aef4c63a669e3c140655cdfdf395b6c979b400a447bd5dcb65ed8826c3d",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/msvcp140_2.dll",
+          "Target": "033-runtime/msvcp140_2.dll",
+          "Hash": "3ea06f0ee098b4823cb79599df3780e7f23cce52c19aac31d2a0d47efe33a5e9",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/msvcp140_codecvt_ids.dll",
+          "Target": "033-runtime/msvcp140_codecvt_ids.dll",
+          "Hash": "f2069a52880ec885ee7f0511186100eb7fada0411a2b4948fafea7735b878a18",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/vccorlib140.dll",
+          "Target": "033-runtime/vccorlib140.dll",
+          "Hash": "19839407c3fdbc824e5bce189bf68ddf8097f12ec28b757797ffa0415c144ddd",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/vcruntime140_threads.dll",
+          "Target": "033-runtime/vcruntime140_threads.dll",
+          "Hash": "219915cf20822f34d5e7c1fdd4e21ae7f3396881096c51036225fb8f84b47afa",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/msvcp140.dll",
+          "Target": "033-runtime/semantic/msvcp140.dll",
+          "Hash": "0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/msvcp140_atomic_wait.dll",
+          "Target": "033-runtime/semantic/msvcp140_atomic_wait.dll",
+          "Hash": "640b2aefced484d0368eea5bdd06addd0658a3a70a49256e560d6923b404a479",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/vcruntime140.dll",
+          "Target": "033-runtime/semantic/vcruntime140.dll",
+          "Hash": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/vcruntime140_1.dll",
+          "Target": "033-runtime/semantic/vcruntime140_1.dll",
+          "Hash": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/concrt140.dll",
+          "Target": "033-runtime/semantic/concrt140.dll",
+          "Hash": "2405355f0a58067b258f8df33c327e3a3d716eaac5a3a5aebb757842d85bd376",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/msvcp140_1.dll",
+          "Target": "033-runtime/semantic/msvcp140_1.dll",
+          "Hash": "bfad5aef4c63a669e3c140655cdfdf395b6c979b400a447bd5dcb65ed8826c3d",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/msvcp140_2.dll",
+          "Target": "033-runtime/semantic/msvcp140_2.dll",
+          "Hash": "3ea06f0ee098b4823cb79599df3780e7f23cce52c19aac31d2a0d47efe33a5e9",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/msvcp140_codecvt_ids.dll",
+          "Target": "033-runtime/semantic/msvcp140_codecvt_ids.dll",
+          "Hash": "f2069a52880ec885ee7f0511186100eb7fada0411a2b4948fafea7735b878a18",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/vccorlib140.dll",
+          "Target": "033-runtime/semantic/vccorlib140.dll",
+          "Hash": "19839407c3fdbc824e5bce189bf68ddf8097f12ec28b757797ffa0415c144ddd",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/crt-s3/vcruntime140_threads.dll",
+          "Target": "033-runtime/semantic/vcruntime140_threads.dll",
+          "Hash": "219915cf20822f34d5e7c1fdd4e21ae7f3396881096c51036225fb8f84b47afa",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "crt"
+        },
+        {
+          "Source": "payload/exclusive/033-runtime/semantic/033-person-worker.exe",
+          "Target": "033-runtime/semantic/033-person-worker.exe",
+          "Hash": "ff9f40dc249ccf6642a485a14d58d8f569a6d3645d0b6a8e1e123f91e034be11",
+          "Architecture": "x64",
+          "Policy": "replace",
+          "Role": "semantic-worker"
+        }
+      ],
+      "Components": {
+        "mfg2030": {
+          "Label": "多帧转接件 nvidia_mfg_bridge v0.504",
+          "GpuGenerations": [
+            20,
+            30
+          ],
+          "GameFrameGen": "present",
+          "LoaderRole": "fg-bridge-loader",
+          "LoaderNames": [
+            "version.dll",
+            "winhttp.dll",
+            "dbghelp.dll",
+            "cryptsp.dll",
+            "XINPUT9_1_0.dll",
+            "IPHLPAPI.dll"
+          ],
+          "RuntimeFiles": [
+            "dlssg_to_fsr3.log",
+            "dlssg_dxgi_debug.log"
+          ],
+          "RequiredDlls": [
+            "MSVCP140.dll",
+            "VCRUNTIME140.dll",
+            "VCRUNTIME140_1.dll",
+            "D3DCOMPILER_47.dll"
+          ]
+        }
+      },
+      "RuntimeFiles": [
+        "ReShade.log",
+        "033-runtime/dlss5-feed.log",
+        "033-runtime/dlss5-feed.cfg",
+        "033-runtime/dlss5-033.log",
+        "033-runtime/dlss5-033.cfg",
+        "033-framegen.log",
+        "033-monitor.cfg",
+        "dlss5-033.log",
+        "dlss5-033.state"
+      ],
+      "RuntimeDirectories": [
+        "033-runtime"
+      ]
+    }
+  },
+  "Families": {
+    "yanyun-native-s4": {
+      "Architecture": "x64",
+      "Api": "dx12",
+      "CoreSHA256": "3bf7d7f04c3c71929073e54f164759c85a7e1874be3b8191ac8d19d1a3bc28c0",
+      "HostSHA256": "418e69676aa2168fcbffdde2e6409b4448e07507a007369e7b9dd8ed2bb7bf59",
+      "NativeFgMax": 6,
+      "NRMaxLayersPerBranch": 3,
+      "SharedControlsCount": 64,
+      "FrozenSnapshotBytes": 872,
+      "LegacyX86": false,
+      "Vulkan": false
+    }
+  }
+}

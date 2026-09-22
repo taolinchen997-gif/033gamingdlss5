@@ -1,0 +1,6 @@
+FreeType（核心通过 OptiScaler 静态链接 freetype.lib，给面板字体用）
+源码：https://freetype.org
+
+Portions of this software are copyright © The FreeType Project (www.freetype.org). All rights reserved.
+
+本包按 FreeType License（FTL）使用 FreeType；FTL 原文：https://gitlab.freedesktop.org/freetype/freetype/-/blob/master/docs/FTL.TXT

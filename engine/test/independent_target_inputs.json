@@ -1,0 +1,71 @@
+{
+  "suite": "InstallerTargetCpu",
+  "productionExecutionAvailable": false,
+  "files": [
+    {
+      "path": "engine/deploy/independent_target.ps1",
+      "sha256": "03ffdc9c7b3bdae2aa7def4e98c9ededce200c2b1b84f39ec4b1ed71eb5dbb0d",
+      "bytes": 13458
+    },
+    {
+      "path": "engine/deploy/independent_target_windows.cs",
+      "sha256": "5a8b6677e6cbad1190a193034b42acb2bf241d75b5399bee82c6314b105acf3a",
+      "bytes": 4873
+    },
+    {
+      "path": "engine/deploy/independent_target_plan.ps1",
+      "sha256": "2fc57d12b80b0d4a4282304bfd0b801758247da732b8e16ca6a8c20984d40cb3",
+      "bytes": 2198
+    },
+    {
+      "path": "engine/deploy/independent_migration_plan.ps1",
+      "sha256": "39930a5c87b9cd341eb7be4c7651aa78238a790a55e64657cb0df023b7695b2c",
+      "bytes": 12143
+    },
+    {
+      "path": "engine/deploy/independent_package.ps1",
+      "sha256": "a65f5f755a3b0f74fc5d7556c24531f2679dea6e233c56b71df1a0eb7a64499f",
+      "bytes": 16922
+    },
+    {
+      "path": "engine/deploy/independent_windows.cs",
+      "sha256": "0d9ad204c61fa68378e493af1ec767d88194115984113c39106535d8c18d252a",
+      "bytes": 4417
+    },
+    {
+      "path": "engine/deploy/independent_json.cs",
+      "sha256": "3c06d69b57be68e34ed647daaa8a79a240369d076c80cd9f7513d3cf738a89ed",
+      "bytes": 5397
+    },
+    {
+      "path": "engine/deploy/deployment_transaction.ps1",
+      "sha256": "3d5a6762687974d1ee4892cf57692b186b05a8b522ecae8adb7c6058e31e5726",
+      "bytes": 13638
+    },
+    {
+      "path": "engine/deploy/pe_inspection.ps1",
+      "sha256": "f57e74ac8adcfe48d6217f91cedca51c0cd5f3dfc88f0d0494730db04dd76692",
+      "bytes": 9949
+    },
+    {
+      "path": "engine/deploy/contracts/033-independent-package-v1.schema.json",
+      "sha256": "a2a4dc6de2dfbb2d54005aa4cfa789bd4aed4123dceb6782df7ecbbe32122899",
+      "bytes": 21527
+    },
+    {
+      "path": "engine/deploy/contracts/033-target-selection.md",
+      "sha256": "a60e47d40adbca57e1704eb12278f9f7ab71bbe69efb0937861896044930f8e1",
+      "bytes": 3853
+    },
+    {
+      "path": "engine/test/fixtures/independent-target/builders.ps1",
+      "sha256": "5a17c151586569abcc79b5d6d8aacf08dc306e1ab40a78888bc01be0890b5706",
+      "bytes": 9949
+    },
+    {
+      "path": "engine/test/fixtures/independent-target/source.json",
+      "sha256": "05478d4a60f0375ca6a898eeb5057ed5c850cc3d18c2ab9edebce276dd888271",
+      "bytes": 458
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "OriginalSHA256": "0bc32bc92e985b881141ef9bd2216e2a746f70519d0d24da9fc85decc4428cf4",
+  "InstalledCandidateSHA256": "4fa0b870a6075e6e7fcb55fe5fe7cb10abc61c244a60fc2bbc563af28ee94f26",
+  "Sources": {
+    "DXLSource": "https://github.com/LCPD15/DXL/tree/8644a875e61a9ecb8379f78ce9fd3ef3bc4853a4",
+    "OriginalModelArchive": "https://github.com/LCPD15/DXL/releases/download/v0.1/DXL-v0.1-model-source.zip",
+    "OriginalWeights": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11n-seg.pt",
+    "ONNXConverterAPI": "https://onnx.ai/onnx/api/version_converter.html",
+    "ONNXConverterSource": "https://github.com/onnx/onnx/blob/v1.19.1/onnx/version_converter/convert.h",
+    "ONNXTypeRestriction": "https://github.com/onnx/onnx/blob/v1.19.1/onnx/version_converter/adapters/type_restriction.h",
+    "ORTDirectMLRegistration": "https://github.com/microsoft/onnxruntime/blob/3a728b75062256951b6e19ce718907cf1a1d4cf0/onnxruntime/core/providers/dml/DmlExecutionProvider/src/Operators/OperatorRegistration.cpp",
+    "ORTDirectMLDocumentation": "https://onnxruntime.ai/docs/execution-providers/DirectML-ExecutionProvider.html"
+  }
+}

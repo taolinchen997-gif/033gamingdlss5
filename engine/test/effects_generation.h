@@ -1,0 +1,2 @@
+#define EFFECTS_NEW 1
+#define EFFECTS_ROUTE_CHECK 1

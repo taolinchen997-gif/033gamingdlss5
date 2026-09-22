@@ -1,0 +1,92 @@
+{
+  "fixtureOnly": true,
+  "productionAvailable": false,
+  "installable": false,
+  "safeToResetProduction": false,
+  "categories": [
+    {
+      "name": "unchanged-runtime-header-counterexample",
+      "cases": 3
+    },
+    {
+      "name": "source-derived-dirty-boundary-model",
+      "cases": 1
+    },
+    {
+      "name": "closed-fixture-protocol-model",
+      "cases": 8
+    }
+  ],
+  "files": [
+    {
+      "path": "engine/test/shared_settings_barrier_cpu_test.cpp",
+      "sha256": "ff464443cbb97fbcd62a5f2e73cacc70d7efc592ba249fdd4f5944360b7da202",
+      "bytes": 20856
+    },
+    {
+      "path": "engine/test/shared_settings_barrier_model.h",
+      "sha256": "698059937865049a8f7504c0ef6fe82997c6b0ee2e918904df7ae54ed5042cfe",
+      "bytes": 7598
+    },
+    {
+      "path": "engine/deploy/contracts/shared-settings-barrier-proposal.md",
+      "sha256": "4f27ab4e124ff8b3eef544f717fb726c13621a2a30b903463b13a201680ad51c",
+      "bytes": 4799
+    },
+    {
+      "path": "engine/test/fixtures/shared-settings-runtime-v1/source-manifest.json",
+      "sha256": "03405b8080d4148f8a5ff90cdc70fd64894f4c8db7f2cdf6c7571d0623adde24",
+      "bytes": 1955
+    },
+    {
+      "path": "engine/test/fixtures/shared-settings-runtime-v1/include/033_input.h",
+      "sha256": "4cd3c0d0153d2ec6dd67d4c3b700a6b3c8a2ef58d12ad0cb7bd0a531176ad8de",
+      "bytes": 5547
+    },
+    {
+      "path": "engine/test/fixtures/shared-settings-runtime-v1/include/033_nr.h",
+      "sha256": "99cedbb847bcc41aa21fce4f31c08787213f6e775fbc4c80817c45316a433afc",
+      "bytes": 1193
+    },
+    {
+      "path": "engine/test/fixtures/shared-settings-runtime-v1/include/033_runtime.h",
+      "sha256": "564bdfaf28fef7c8e2473b856a5dcafaca355b11c45854f872f0853e435e4a49",
+      "bytes": 3572
+    },
+    {
+      "path": "engine/test/fixtures/shared-settings-runtime-v1/include/033_sr.h",
+      "sha256": "e37b08c4682d9d4d40aa7dcca21b3d116f7ff783c81e93c893342e79b8fdd642",
+      "bytes": 3455
+    },
+    {
+      "path": "engine/test/fixtures/shared-settings-runtime-v1/shared/config_store.h",
+      "sha256": "8a284f06dbc93cd81fee1b266e4f279368a9ab6c7472f1d31e65b1d78edc06c1",
+      "bytes": 5422
+    },
+    {
+      "path": "engine/test/fixtures/shared-settings-runtime-v1/shared/nr_settings.h",
+      "sha256": "115f552122c3d93df596ef31b520e19d53ba7b03cbb196d335b88cd5fa398011",
+      "bytes": 2275
+    },
+    {
+      "path": "engine/test/fixtures/shared-settings-runtime-v1/shared/preferences_mailbox.h",
+      "sha256": "a457457a7b56ee9aa23a656e3f1034ff214625e263f673a6b331cdd2d0cd7531",
+      "bytes": 3177
+    },
+    {
+      "path": "engine/test/fixtures/shared-settings-runtime-v1/shared/pregrade.h",
+      "sha256": "60f1d2c6bf4033136fda587600282b62a9c483418a23b3d4811c3aabd4931a21",
+      "bytes": 1429
+    },
+    {
+      "path": "engine/test/fixtures/shared-settings-runtime-v1/shared/settings_codec.h",
+      "sha256": "6b832206b55f62635499892f683da3df09ddccc1e26f0ae74e1facc3cb96f725",
+      "bytes": 6171
+    },
+    {
+      "path": "engine/test/fixtures/shared-settings-runtime-v1/src/backend.h",
+      "sha256": "cdff2a3539a36cb23d4d892fd1f92eb4f2c8b037e1880f528bb3dd9cfa0638bf",
+      "bytes": 1496
+    }
+  ]
+}

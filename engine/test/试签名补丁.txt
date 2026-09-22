@@ -1,0 +1,42 @@
+自研 NR 内核 · 签名运行库 IAT 补丁 —— 手动验证步骤
+=====================================================================
+
+背景: 我们的 nvngx_dlssnr.dll 未签名, NGX 拒收 → CreateFeature(18)=0xBAD0000C。
+snr.h 复刻 renodx 的招: LoadLibrary 它 → 改它 IAT 里 GetModuleFileNameW →
+自检时返回旁边签名的 nvngx_dlss.dll 路径 → 骗过验签。
+验证目标: 打补丁后 CreateFeature(18) 是否不再 OutOfDate。
+
+harness 进不了游戏(前台锁), 所以这一步要你手动点一次"开始游戏"。
+
+── 怎么跑 ──────────────────────────────────────────────
+1. 关掉正在跑的古墓丽影(如果开着)。
+2. PowerShell 里跑(会自动: 挪开 renodx 单独测 → 部署带补丁的插件 → 写 cfg → 启动游戏):
+
+   $s = "E:\Steam\steamapps\common\Shadow of the Tomb Raider"
+   if (Test-Path "$s\renodx-dlss5.addon64") { Rename-Item "$s\renodx-dlss5.addon64" "renodx-dlss5.addon64.off" -Force }
+   Copy-Item "E:\033插件\build\dlss5-033.addon64" "$s\" -Force
+   Set-Content "$s\dlss5-033.cfg" -Value "autoprobe=1`nsnr_patch=1" -Encoding ASCII
+   Remove-Item "$s\dlss5-033.log" -Force -ErrorAction SilentlyContinue
+   Start-Process "steam://rungameid/750920"
+
+3. ★你手动点启动器的"开始游戏"★, 进到任意画面(有游戏画面就行), 待 15 秒。
+4. 退游戏。看日志:
+
+   Get-Content "$s\dlss5-033.log" -Encoding UTF8
+
+5. 看完把 renodx 放回去:
+   if (Test-Path "$s\renodx-dlss5.addon64.off") { Rename-Item "$s\renodx-dlss5.addon64.off" "renodx-dlss5.addon64" -Force }
+   Set-Content "$s\dlss5-033.cfg" -Value "autoprobe=0" -Encoding ASCII
+
+── 日志里要看的 ────────────────────────────────────────
+  [snr] 补丁: 就位 | 已加载=1 改写thunk=2 重定向目标=...\nvngx_dlss.dll | 补丁就位
+  [1] GetFeatureRequirements(18): 返回 0x1 | 支持位域 0x0 ...   ← 0x1+位域0 = 补丁生效, NR 被认了!
+  [3] CreateFeature(18) @100% ...: 返回 0x1 ...                ← 0x1 = ★不靠 renodx 自己点亮了 NR★
+
+  对比(没补丁时): 返回 0xBAD0000C(OutOfDate), 支持位域 0xFFFFFFFF。
+
+  可能的中间结果:
+  · 改写thunk=0 → 杀毒锁了 IAT 或名字是转发 dll, 把游戏目录加白名单重试。
+  · 补丁就位但 CreateFeature 仍 0xBAD0000C → 自检不止查 GetModuleFileNameW(可能还查
+    GetModuleHandleExW 或核心侧验签), 需要再逆向一层, 把结果告诉我。
+  · CreateFeature=0x1 → 成了, 下一步把求值接上, NR 就真归我们了。

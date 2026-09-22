@@ -1,0 +1,3 @@
+GPUPixel, Copyright (c) 2021 PixPark. Apache License 2.0.
+https://github.com/pixpark/gpupixel
+033 adapts the variance-adaptive blending in BeautyFaceUnitFilter. Native HLSL uses a 5x5 sampled mean/variance and face landmarks; upstream skin brightness gate, whitening LUTs, sharpening and face reshaping are not included. There is no OpenGL runtime or GPUPixel detector dependency.

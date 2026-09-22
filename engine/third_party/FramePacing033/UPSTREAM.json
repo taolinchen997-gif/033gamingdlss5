@@ -1,0 +1,78 @@
+[
+  {
+    "path": "third_party/OptiScaler033/external/FidelityFX-SDK-v2/Kits/FidelityFX/framegeneration/fsr3/dx12/FrameInterpolationSwapchainDX12.cpp",
+    "sha256": "6882b9f8ceb63822c09bc8f6ce1c4f732063e984f0366fa7563a14c25ebe28a0"
+  },
+  {
+    "path": "third_party/OptiScaler033/external/FidelityFX-SDK-v2/Kits/FidelityFX/framegeneration/fsr3/dx12/FrameInterpolationSwapchainDX12_DebugPacing.cpp",
+    "sha256": "3e4ad29a8c5887f0727c792d66e5943f2e73eeb9d7f689a5ee264fb902b64c9d"
+  },
+  {
+    "path": "third_party/OptiScaler033/external/FidelityFX-SDK-v2/Kits/FidelityFX/framegeneration/fsr3/dx12/FrameInterpolationSwapchainDX12_Helpers.cpp",
+    "sha256": "e76b49b16e549e231286a171f53b314952f0049c50b999ed2224b6b031b75100"
+  },
+  {
+    "path": "third_party/OptiScaler033/external/FidelityFX-SDK-v2/Kits/FidelityFX/framegeneration/fsr3/dx12/FrameInterpolationSwapchainDX12_UiComposition.cpp",
+    "sha256": "d90e218236d0b43f707fca78a8c3d2bc7a988c79d70d6e1bc66d99ab4cf3d863"
+  },
+  {
+    "path": "third_party/OptiScaler033/external/FidelityFX-SDK-v2/Kits/FidelityFX/framegeneration/fsr3/dx12/FrameInterpolationSwapchainDebugPacingPS.h",
+    "sha256": "e5b7dcdad6ffac76cb4861d666a599052a62208aca03118d2ba3cb1798d4ece9"
+  },
+  {
+    "path": "third_party/OptiScaler033/external/FidelityFX-SDK-v2/Kits/FidelityFX/framegeneration/fsr3/dx12/FrameInterpolationSwapchainDebugPacingVS.h",
+    "sha256": "d798903baf79f0681310ae7e2c868cdbd4df11295a4c0c550e01002dad70eab9"
+  },
+  {
+    "path": "third_party/OptiScaler033/external/FidelityFX-SDK-v2/Kits/FidelityFX/framegeneration/fsr3/dx12/FrameInterpolationSwapchainDX12.h",
+    "sha256": "bcbec6bacfe2c32737d3a7a05770f335a8dd68ed454f22cc0a4202280572371c"
+  },
+  {
+    "path": "third_party/OptiScaler033/external/FidelityFX-SDK-v2/Kits/FidelityFX/framegeneration/fsr3/dx12/FrameInterpolationSwapchainDX12_DebugPacing.h",
+    "sha256": "0da7153f0ed92aef2b43ae7c2a84896b38197174f17c96ddca16e4e92100243a"
+  },
+  {
+    "path": "third_party/OptiScaler033/external/FidelityFX-SDK-v2/Kits/FidelityFX/framegeneration/fsr3/dx12/FrameInterpolationSwapchainDX12_Helpers.h",
+    "sha256": "e191f836116ace99e445d313c7f759068b5b757a858fb3edb5f6918dc332bac4"
+  },
+  {
+    "path": "third_party/OptiScaler033/external/FidelityFX-SDK-v2/Kits/FidelityFX/framegeneration/fsr3/dx12/FrameInterpolationSwapchainDX12_UiComposition.h",
+    "sha256": "d87c2353a53baf95c4e520301c22d56e25d41d70d0f2796d66d444415bfdf706"
+  },
+  {
+    "path": "third_party/OptiScaler033/external/FidelityFX-SDK-v2/Kits/FidelityFX/framegeneration/fsr3/dx12/FrameInterpolationSwapchainUiCompositionPremulPS.h",
+    "sha256": "8a07e9f12a3bf1e967ecc6f8d38a1d61fddcb677bb65db45acf52a466cbac506"
+  },
+  {
+    "path": "third_party/OptiScaler033/external/FidelityFX-SDK-v2/Kits/FidelityFX/framegeneration/fsr3/dx12/FrameInterpolationSwapchainUiCompositionPremulVS.h",
+    "sha256": "048771ef6898086d1d702bb230c650c5d919451f00fef1964af127571a1f932d"
+  },
+  {
+    "path": "third_party/OptiScaler033/external/FidelityFX-SDK-v2/Kits/FidelityFX/framegeneration/fsr3/dx12/FrameInterpolationSwapchainUiCompositionPS.h",
+    "sha256": "e8aefed663ace0edf9697a306ec3dd59a0c97849601aee162cdd68ed775011b6"
+  },
+  {
+    "path": "third_party/OptiScaler033/external/FidelityFX-SDK-v2/Kits/FidelityFX/framegeneration/fsr3/dx12/FrameInterpolationSwapchainUiCompositionVS.h",
+    "sha256": "048771ef6898086d1d702bb230c650c5d919451f00fef1964af127571a1f932d"
+  },
+  {
+    "path": "third_party/OptiScaler033/external/FidelityFX-SDK-v2/Kits/FidelityFX/backend/dx12/ffx_dx12.cpp",
+    "sha256": "dcd6df270b04ce153b5f6eb2af584089e374b1e1d274da528160d9e6d336c440",
+    "functions": [
+      "ffxGetDeviceDX12",
+      "ffxGetCommandListDX12",
+      "ffxGetResourceDX12",
+      "ffxGetDX12StateFromResourceState",
+      "ffxGetSurfaceFormatDX12",
+      "IsDepthDX12",
+      "IsStencilDX12",
+      "ffxGetResourceDescriptionDX12",
+      "ffxGetCommandQueueDX12",
+      "ffxGetSwapchainDX12",
+      "ffxGetDX12SwapchainPtr",
+      "ffxGetDX12FormatFromSurfaceFormat",
+      "ffxGetDX12ResourceFlags",
+      "ffxGetResourceSizeFromDescriptionDX12"
+    ]
+  }
+]
