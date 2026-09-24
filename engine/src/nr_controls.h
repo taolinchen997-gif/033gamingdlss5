@@ -9,7 +9,7 @@ static bool dirty[nrcontrolsabi::Count]={};
 static uint32_t actions=0,pendingMfg=UINT32_MAX;
 static yanyunrecipe::RequestQueue recipeQueue;
 static uint64_t RecipeRevision(){std::lock_guard<std::mutex> lock(mutex);return recipeQueue.revision;}
-static yanyunrecipe::SubmitResult SetRecipe(const yanyunrecipe::Recipe& recipe,bool regional,uint64_t expected){
+static yanyunrecipe::SubmitResult SetRecipe(const yanyunrecipe::Recipe& recipe,uint32_t regional,uint64_t expected){
  std::lock_guard<std::mutex> lock(mutex);
  const auto result=recipeQueue.Submit(recipe,regional,expected,true);
  if(result==yanyunrecipe::SubmitResult::Accepted){
@@ -79,9 +79,12 @@ static void Pump(){
  if(rendercore::Integrated())carrier::HotkeyTick();
  static yanyunrecipe::Store<> activeStore(true);static bool restored=false;
  if(!restored){restored=true;yanyunrecipe::Recipe saved;
-  if(activeStore.Load(saved)){yanyundual::Apply(saved,saved.regional!=0);Log("[033 YY recipe] restored complete applied recipe");}}
+  if(activeStore.Load(saved)){yanyundual::Apply(saved,saved.regional);Log("[033 YY recipe] restored complete applied recipe");}}
  recipeQueue.Consume([&](const yanyunrecipe::Recipe& recipe){
-  yanyundual::Apply(recipe,recipe.regional!=0);
+  yanyundual::Apply(recipe,recipe.regional);
+  if(recipe.regional==yanyunrecipe::SharedFirstLayer)
+   Log("[033 YY S32 mode 2] applied: first layer from the whole column (precision %d%%, style %d, intensity %.3f, detail %.3f); layer count %d and layers 2-3 from the scene column; person region stops after the first layer, no person NR pass",
+    carrier::cfg.work,carrier::cfg.style,carrier::cfg.intensity,carrier::cfg.local_structure,carrier::cfg.passes);
   Log("[033 YY recipe] applied revision=%llu regional=%u layers=%d/%d/%d stored_fidelity=%.3f stored_scene=%.3f (S28: not applied, person and scene at full effect); render acceptance pending",yanyundual::revision,unsigned(recipe.regional),int(yanyunrecipe::Get(recipe,yanyunrecipe::Whole,nrcontrolsabi::Passes)),int(yanyunrecipe::Get(recipe,yanyunrecipe::Character,nrcontrolsabi::Passes)),int(yanyunrecipe::Get(recipe,yanyunrecipe::Scene,nrcontrolsabi::Passes)),recipe.fidelity,recipe.sceneStrength);
   if(!activeStore.Save(recipe))Log("[033 YY recipe] active save failed; current session applied; previous disk state preserved");
  });
@@ -107,6 +110,7 @@ static void Pump(){
  if(previousEnabled!=carrier::cfg.enabled){hostnr::invalidate_history();carrier::g.need_reset=true;previousEnabled=carrier::cfg.enabled;}
  static bool recipeDirty=false;static ULONGLONG recipeChanged=0;
  if(yanyundual::SyncScene()){recipeDirty=true;recipeChanged=GetTickCount64();}
+ srmodel033::PollLog(); // S33: when the game asks for its render size, and our answer
  if(recipeDirty&&((actions&(1u<<nrcontrolsabi::Save))||GetTickCount64()-recipeChanged>=600)){
   if(activeStore.Save(yanyundual::appliedRecipe))recipeDirty=false;
   else recipeChanged=GetTickCount64();
@@ -116,8 +120,8 @@ static void Pump(){
 }
 extern "C" __declspec(dllexport) uint32_t __cdecl K033_SubmitYanYunRecipe(
  const yanyunrecipe::Recipe* recipe,uint32_t bytes,uint32_t regional,uint64_t expected){
- if(!recipe||bytes!=sizeof(yanyunrecipe::Recipe)||regional>1)return uint32_t(yanyunrecipe::SubmitResult::Invalid);
- return uint32_t(nrcontrols::SetRecipe(*recipe,regional!=0,expected));
+ if(!recipe||bytes!=sizeof(yanyunrecipe::Recipe)||regional>=yanyunrecipe::PartitionCount)return uint32_t(yanyunrecipe::SubmitResult::Invalid);
+ return uint32_t(nrcontrols::SetRecipe(*recipe,regional,expected));
 }
 extern "C" __declspec(dllexport) uint64_t __cdecl K033_YanYunRecipeRevision(){return nrcontrols::RecipeRevision();}
 extern "C" __declspec(dllexport) const nrcontrolsabi::Api* __cdecl K033_GetNrControls(uint32_t version){

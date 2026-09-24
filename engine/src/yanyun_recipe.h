@@ -17,6 +17,12 @@ inline constexpr Id Fields[]={Work,Passes,Full,Preset,Style,Intensity,Structure,
  L3Style,L3Preset,L3Intensity,L3Structure,L3LocalTone,L3Skin,L3GlobalTone,L3AutoMask,L3UiCorrect,PassWork3,SkinLift,NaturalLook};
 inline constexpr unsigned FieldCount=sizeof(Fields)/sizeof(Fields[0]),MaxCode=8192;
 enum Group:unsigned {Whole,Character,Scene,Groups};
+// S32 (owner 2026-09-24: 「之前的叫模式一，现在改的叫模式二」). Recipe::regional:
+// 0 = whole picture, 1 = 模式一 (person and scene each run their own complete chain
+// over the whole picture), 2 = 模式二 (the whole column's first layer runs once over
+// the whole picture; the person region stops after it and the scene region goes on
+// with the scene column's layers 2 and 3). Older cores refuse 2 as invalid.
+enum Partition:uint32_t {WholePicture=0,SeparateChains=1,SharedFirstLayer=2,PartitionCount};
 enum PresetKind:unsigned {Custom,Realistic,Restore};
 struct Recipe {
  uint32_t size=sizeof(Recipe),version=2,kind=Custom,reserved=0;
@@ -28,11 +34,24 @@ static_assert(std::is_standard_layout_v<Recipe> && std::is_trivially_copyable_v<
 static_assert(sizeof(Recipe)==100+Groups*FieldCount*sizeof(float),"Dedicated recipe wire layout");
 static_assert(nrcontrolsabi::Count==64 && sizeof(nrcontrolsabi::FrozenSnapshot)==872,"Do not expand the frozen feeder");
 inline int Index(Id id){for(unsigned i=0;i<FieldCount;++i)if(Fields[i]==id)return int(i);return -1;}
+// The first NR layer and its size. In 模式二 these come from the whole column; every
+// other field of the shared chain (layer count, layers 2-3, their sizes, grade and
+// composition) comes from the scene column.
+inline constexpr Id FirstLayerFields[]={Work,Full,Preset,Style,Intensity,Structure,GlobalTone,LocalTone,Skin,AutoMask,UiCorrect};
+inline bool FirstLayerField(Id id){for(auto field:FirstLayerFields)if(field==id)return true;return false;}
+// The group a field of the rendered chain is read from (apply) and written back to (sync).
+inline Group ChainGroup(uint32_t regional,Id id){
+ return regional==WholePicture?Whole:regional==SharedFirstLayer&&FirstLayerField(id)?Whole:Scene;
+}
+// Groups whose first-layer precision (Work) is actually rendered in this mode.
+inline bool WorkRendered(uint32_t regional,Group group){
+ return regional==SeparateChains?group!=Whole:group==Whole;
+}
 inline void Set(Recipe& r,Group group,Id id,float value){const int i=Index(id);if(i>=0)r.values[group][i]=value;}
 inline float Get(const Recipe& r,Group group,Id id){const int i=Index(id);return i<0?0:r.values[group][i];}
 inline bool Valid(const Recipe& r){
  if(r.size!=sizeof(Recipe)||r.version!=2||r.kind>Restore||r.reserved||r.padding[0]||r.padding[1]||r.padding[2]||std::memcmp(r.model,Model,sizeof(Model)))return false;
- if(r.regional>1||!std::isfinite(r.fidelity)||r.fidelity<0||r.fidelity>1||!std::isfinite(r.sceneStrength)||r.sceneStrength<0||r.sceneStrength>1||!std::isfinite(r.feather)||r.feather<0||r.feather>8)return false;
+ if(r.regional>=PartitionCount||!std::isfinite(r.fidelity)||r.fidelity<0||r.fidelity>1||!std::isfinite(r.sceneStrength)||r.sceneStrength<0||r.sceneStrength>1||!std::isfinite(r.feather)||r.feather<0||r.feather>8)return false;
  for(unsigned g=0;g<Groups;++g)for(unsigned i=0;i<FieldCount;++i)if(!nrcontrolsabi::Valid(Fields[i],r.values[g][i]))return false;
  return true;
 }
@@ -79,8 +98,10 @@ inline bool NeutralSceneSkin(Recipe& r){
  }
  return changed;
 }
-template<class Cfg> void NeutralSceneSkin(Cfg& cfg){
- cfg.skin_structure=SceneSkinStructure;cfg.auto_mask=int(SceneAutoMask);
+// In 模式二 the chain's first layer is the whole column's (skin options live there, it
+// also renders the people), so only layers 2-3 are the scene's own.
+template<class Cfg> void NeutralSceneSkin(Cfg& cfg,bool firstLayerIsWhole=false){
+ if(!firstLayerIsWhole){cfg.skin_structure=SceneSkinStructure;cfg.auto_mask=int(SceneAutoMask);}
  for(auto& layer:cfg.extra){layer.skin=SceneSkinStructure;layer.autoMask=int(SceneAutoMask);}
 }
 inline uint32_t Checksum(std::string_view s){uint32_t h=2166136261u;for(unsigned char c:s)h=(h^c)*16777619u;return h;}
@@ -110,9 +131,9 @@ inline DecodeResult Decode(std::string_view code,Recipe& output){
 enum class SubmitResult:uint32_t {Accepted,Invalid,RegionsUnavailable,Stale};
 struct RequestQueue {
  Recipe next{};uint64_t revision=0,consumed=0;bool queued=false;
- SubmitResult Submit(const Recipe& r,bool regional,uint64_t expected,bool regionsAvailable=false){
-  if(!Valid(r))return SubmitResult::Invalid;if(regional&&!regionsAvailable)return SubmitResult::RegionsUnavailable;
-  if(expected!=revision)return SubmitResult::Stale;next=r;next.regional=regional?1u:0u;++revision;queued=true;return SubmitResult::Accepted;
+ SubmitResult Submit(const Recipe& r,uint32_t regional,uint64_t expected,bool regionsAvailable=false){
+  if(!Valid(r)||regional>=PartitionCount)return SubmitResult::Invalid;if(regional&&!regionsAvailable)return SubmitResult::RegionsUnavailable;
+  if(expected!=revision)return SubmitResult::Stale;next=r;next.regional=regional;++revision;queued=true;return SubmitResult::Accepted;
  }
  template<class Sink>bool Consume(Sink&& sink){if(!queued)return false;sink(next);consumed=revision;queued=false;return true;}
 };

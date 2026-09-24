@@ -9,6 +9,9 @@
 #include "yanyun_appearance_store.h"
 #include "panel_yanyun_recipe.h"
 #include "panel_yanyun_columns.h"
+#include "yanyun_tuning.h"
+#include "yanyun_hotkey_store.h"
+#include "yanyun_fg_check.h"
 
 namespace panel
 {
@@ -261,7 +264,7 @@ static void draw_legacy(reshade::api::effect_runtime *runtime,int selected=-1)
         {
             if (ImGui::Button(on ? "关闭神经渲染" : "开启神经渲染", ImVec2(fs * 8.6f, fs * 1.7f)))
                 carrier::Toggle();
-            tip("开关整套神经渲染，默认快捷键 Shift+F11。\n设置会自动保存。");
+            tip("开关整套神经渲染，默认快捷键 F11。\n设置会自动保存。");
         }
         else
         {
@@ -1140,6 +1143,10 @@ static void draw_main(reshade::api::effect_runtime* runtime){
         state.bridgeMode=ini.mode;state.bridgeForce=(std::max)(0,(std::min)(4,ini.force));
         state.bridgeSaved=bridgeSave==1;state.bridgeSaveFailed=bridgeSave==2;
     }
+    // S38: Windows GPU scheduling and build, read-only, every five seconds (the FG page names what is missing on RTX 20/30).
+    {static ULONGLONG checked=0;static unsigned hags=0,build=0;
+        if(!checked||GetTickCount64()-checked>=5000){checked=GetTickCount64();hags=unsigned(fgcheck033::Scheduling());build=fgcheck033::WindowsBuild();}
+        state.hags=hags;state.osBuild=build;}
     const auto timing=gputime::snapshot();if(timing.fresh())state.nrMs=float(timing.total);
     if(mfgunlock::reflex::report_available.load()==1 && GetTickCount64()-mfgunlock::reflex::state_time_ms.load()<2000 && mfgunlock::reflex::gpu_frame_us.load()>0)
         state.gpuFrameMs=float(mfgunlock::reflex::gpu_frame_us.load())/1000.f;
@@ -1161,7 +1168,17 @@ static void draw_main(reshade::api::effect_runtime* runtime){
             if(read==yanyunrecipe::LibraryRead::Missing&&recipeStore.Load(earlier)){yanyunrecipe::LibraryEntry entry;
                 yanyunrecipe::SetName(entry,yyappearance::Text("之前保存的方案","Earlier saved preset"));entry.recipe=earlier;
                 recipeView.library.push_back(entry);libraryStore.Save(recipeView.library);}}} // kept in the list even if this write fails; the next save writes it
+    // S35 033特调: the badge shows whether the before-file exists. While the settings folder
+    // cannot be reached the switch stays unknown (not clickable) and is asked again in two seconds.
+    static yanyuntuning::Store<> tuningStore;static int tuningOn=-1;static ULONGLONG tuningRetryMs=0;
+    if(tuningOn<0&&GetTickCount64()>=tuningRetryMs){const auto presence=tuningStore.Exists();
+        if(presence==yanyuntuning::Presence::Unknown)tuningRetryMs=GetTickCount64()+2000;else tuningOn=presence==yanyuntuning::Presence::Yes?1:0;}
+    state.tuningOn=tuningOn==1;
     recipeView.requestRevision=nrcontrols::RecipeRevision();
+    // S32 超分模型: what the core holds for the game's own DLSS and what its last creation asked for.
+    {const auto sr=srmodel033::Status();recipeView.srModel=sr.requested;recipeView.srApplied=sr.applied;recipeView.srPending=sr.pending!=0;
+        recipeView.srMajor=sr.major;recipeView.srMinor=sr.minor;recipeView.srPatch=sr.patch;recipeView.srExternal=sr.external!=0;
+        recipeView.srQueries=sr.queries;recipeView.srRenderW=sr.renderW;recipeView.srRenderH=sr.renderH;recipeView.srForcedMilli=sr.forcedMilli;recipeView.srSizePending=sr.sizePending!=0;}
     recipeView.runtimeNote=yanyundual::note.load();
     recipeView.recognitionFailed=yanyundual::recognitionStatus.load()<0;
     {nrdispatch::WriterAccess access;if(access.entered){recipeView.regionalApplied=yanyundual::enabled;recipeView.outputW=hostnr::s_w;recipeView.outputH=hostnr::s_h;recipeView.renderW=hostnr::s_built_gw;recipeView.renderH=hostnr::s_built_gh;}}
@@ -1186,7 +1203,8 @@ static void draw_main(reshade::api::effect_runtime* runtime){
             const bool universalRoute=embeddedui::SupplementalFramegen()==2;
             // 2026-09-12：按【谁真的在出帧】分。燕云自带 DLSS-G（310.6 + Streamline 2.11.1），转接件接管得上；
             // 转接件在场就显示它那张卡，没有就用 033 自己的解锁。
-            if(state.bridgePresent)studio033::Bridge2030(state,edits);
+            // S38: RTX 20/30 always get this card, so a missing bridge or GPU scheduling is named there.
+            if(state.bridgePresent||state.gpuGen==20||state.gpuGen==30)studio033::Bridge2030(state,edits);
             else if(!universalRoute)studio033::FrameGeneration(state,edits);
             break;}
         case 5:studio033::RecipeSr(state,recipeView,recipeEdits);break;
@@ -1222,6 +1240,21 @@ static void draw_main(reshade::api::effect_runtime* runtime){
     if(edits.portrait)nrcontrols::Action(nrcontrolsabi::PortraitNatural);
     if(edits.resetHistory)hostnr::RequestHistoryReset();
     if(edits.mfg)nrcontrols::SetMfg(edits.multiplier);
+    // S37 (owner: 「另外快捷键能改」): the NR key chosen on the panel, live at once and kept per user.
+    if(edits.hotkey>=0&&hotkey033::Allowed(edits.hotkey)){
+        const int before=carrier::cfg.hotkey;carrier::SetHotkey(edits.hotkey);const bool saved=hotkey033::Save(edits.hotkey);
+        static char keyNote[320];
+        std::snprintf(keyNote,sizeof(keyNote),saved?yyappearance::Text("NR 快捷键已换成 %s。","The NR key is now %s."):
+            yyappearance::Text("NR 快捷键已换成 %s，但没能保存，下次进游戏还是原来的键。","The NR key is now %s but was not saved; the next start uses the previous key."),
+            studio033::L(hotkey033::Name(edits.hotkey)));
+        // S39: what to know about the new key (typing keys, the numpad, F9 with Shift).
+        if(const char* extra=hotkey033::Note(edits.hotkey)){const size_t used=std::strlen(keyNote);std::snprintf(keyNote+used,sizeof(keyNote)-used,"%s",studio033::L(extra));}
+        recipeView.note=keyNote;
+        Log("[033 hotkey] NR key changed on the panel: vk %d -> %d (%s), saved %s",before,edits.hotkey,hotkey033::Name(edits.hotkey),saved?"yes":"NO");
+    }
+    // S39: while the panel waits for a new key or one of its text fields takes typing, that press
+    // must not also switch NR (letters and digits can be the NR key now).
+    carrier::HotkeyPanelFrame(ImGui::GetIO().WantTextInput||studio033::keyCapture);
     if(edits.bridge){
         const bool written=bridge2030::WriteSettings(edits.bridgeMode,edits.bridgeForce);bridgeSave=written?1:2;
         Log("[mfg2030] dlssg_to_fsr3.ini FGMode=%d ForceFrameGenOverride=%d → %s（重进游戏生效）",edits.bridgeMode,edits.bridgeForce,written?"已写入":"写入失败");
@@ -1231,6 +1264,9 @@ static void draw_main(reshade::api::effect_runtime* runtime){
         if(recipeStore.Load(loaded))studio033::RecipeLoaded(recipeView,loaded);
         else recipeView.note="未读取到兼容方案；当前草稿已保留。";}
     yanyundual::previewMask.store(recipeView.preview);
+    if(recipeEdits.srModel>=0){const auto result=srmodel033::Request(uint32_t(recipeEdits.srModel));
+        if(result==srmodel033::RequestResult::Refused)recipeView.note="超分模型没能切换，原来的模型保留。";
+        else if(result==srmodel033::RequestResult::NotSaved)recipeView.note="超分模型已切换，但没能保存，下次进游戏会用回原来的。";}
     if(recipeEdits.save){
         if(!recipeView.libraryLoaded)recipeView.note="保存记录暂时读不到，请稍后再试。";
         else if(recipeView.library.size()>=yanyunrecipe::LibraryMax)recipeView.note="保存记录已满（40 条），请先删除不用的。";
@@ -1252,11 +1288,67 @@ static void draw_main(reshade::api::effect_runtime* runtime){
         if(state.available&&!state.paused&&!studio033::RecipePrecisionInvalid(recipeView,bad,allowed))recipeEdits.applyWhole=true;
         else{static char loadedNote[160];
             std::snprintf(loadedNote,sizeof(loadedNote),yyappearance::Text("已载入「%s」，尚未应用。","Loaded \"%s\"; not applied yet."),entry.name);recipeView.note=loadedNote;}}
-    if(recipeEdits.applyWhole){const auto result=nrcontrols::SetRecipe(recipeView.draft,recipeView.draft.regional!=0,recipeView.requestRevision);
+    if(recipeEdits.applyWhole){const auto result=nrcontrols::SetRecipe(recipeView.draft,recipeView.draft.regional,recipeView.requestRevision);
         if(result==yanyunrecipe::SubmitResult::Accepted)recipeView.dirty=false;
         recipeView.note=result==yanyunrecipe::SubmitResult::Accepted?"方案已提交，正在准备模型；生效状态见上方。":"提交失败，草稿已保留，请重试。";
         if(switchedTo&&result==yanyunrecipe::SubmitResult::Accepted){static char switchNote[160];
             std::snprintf(switchNote,sizeof(switchNote),yyappearance::Text("已切换到「%s」，正在准备模型。","Switched to \"%s\"; preparing the model."),switchedTo);recipeView.note=switchNote;}}
+    // S35 (owner 2026-09-24): 「启用033特调」. On: keep the player's applied recipe, SR model and
+    // multiplier, then apply the preset. Off: put them back. A refused step leaves the switch as it was.
+    if(edits.tuning&&tuningOn>=0){
+        static char tuningNote[256];
+        auto precisionInvalid=[&](const yanyunrecipe::Recipe& r,const char*& bad,int& allowed){
+            studio033::RecipeView probe;probe.draft=r;probe.outputW=recipeView.outputW;probe.outputH=recipeView.outputH;
+            probe.renderW=recipeView.renderW;probe.renderH=recipeView.renderH;return studio033::RecipePrecisionInvalid(probe,bad,allowed);};
+        const char* bad="";int allowed=0;
+        if(tuningOn==0){
+            yanyunrecipe::Recipe preset;
+            if(!yanyuntuning::Preset(preset))recipeView.note="033特调的参数读不出来，没有开启。";
+            else if(!state.available||state.paused)recipeView.note="NR 现在没在运行，033特调没有开启。";
+            else if(precisionInvalid(preset,bad,allowed)){
+                std::snprintf(tuningNote,sizeof(tuningNote),yyappearance::Text("033特调的%s精度超过这个分辨率的上限（最多 %d%%），没有开启。",
+                    "033 tuning: its %s precision exceeds this resolution's limit (at most %d%%); not enabled."),bad,allowed);recipeView.note=tuningNote;}
+            else{
+                yanyuntuning::Before before;
+                {nrdispatch::WriterAccess access;before.recipe=access.entered&&yanyundual::haveAppliedRecipe?yanyundual::appliedRecipe:recipeView.draft;}
+                before.srModel=recipeView.srModel;before.frameGeneration=state.mfgAvailable;before.multiplier=state.mfgRequested;
+                if(!tuningStore.Save(before))recipeView.note="没能记下你现在的设置，033特调没有开启。";
+                else if(nrcontrols::SetRecipe(preset,preset.regional,recipeView.requestRevision)!=yanyunrecipe::SubmitResult::Accepted){
+                    tuningStore.Remove();recipeView.note="提交失败，033特调没有开启，原来的设置不变。";}
+                else{
+                    recipeView.draft=preset;recipeView.initialized=true;recipeView.dirty=false;tuningOn=1;
+                    const uint32_t sr=yanyuntuning::SrModelFor(state.gpuGen);srmodel033::Request(sr);
+                    if(state.mfgAvailable)nrcontrols::SetMfg(yanyuntuning::Multiplier);
+                    recipeView.note="已启用 033特调，正在准备模型。";
+                    Log("[033 tuning] on: owner preset submitted (mode %u), SR model %u, frame generation %s; before-state kept",
+                        preset.regional,sr,state.mfgAvailable?"6x":"unchanged");
+                }
+            }
+        }else{
+            yanyuntuning::Before before;const auto read=tuningStore.Load(before);
+            if(read!=yanyuntuning::Read::Ok){
+                if(tuningStore.Remove()){tuningOn=0;recipeView.note="已关闭 033特调；开启前的设置没找到，当前参数保留。";}
+                else recipeView.note="033特调没能关闭，请稍后再试。";
+            }else if(precisionInvalid(before.recipe,bad,allowed)){
+                // Not applied: it would not build at this resolution. The player adjusts and applies it.
+                recipeView.draft=before.recipe;recipeView.initialized=true;recipeView.dirty=true;srmodel033::Request(before.srModel);
+                if(before.frameGeneration&&state.mfgAvailable)nrcontrols::SetMfg(before.multiplier);
+                if(tuningStore.Remove())tuningOn=0;
+                std::snprintf(tuningNote,sizeof(tuningNote),yyappearance::Text("已关闭 033特调；开启前的设置里%s精度超过这个分辨率的上限（最多 %d%%），已放进草稿，调低后点应用。",
+                    "033 tuning off. Your earlier settings exceed this resolution's %s precision limit (at most %d%%); they are in the draft: lower it and apply."),bad,allowed);recipeView.note=tuningNote;
+            }else if(!state.available||state.paused)recipeView.note="NR 现在没在运行，033特调没有关闭。";
+            else if(nrcontrols::SetRecipe(before.recipe,before.recipe.regional,recipeView.requestRevision)!=yanyunrecipe::SubmitResult::Accepted)
+                recipeView.note="提交失败，033特调仍然开着。";
+            else{
+                recipeView.draft=before.recipe;recipeView.initialized=true;recipeView.dirty=false;srmodel033::Request(before.srModel);
+                if(before.frameGeneration&&state.mfgAvailable)nrcontrols::SetMfg(before.multiplier);
+                if(tuningStore.Remove()){tuningOn=0;recipeView.note="已关闭 033特调，回到开启前的设置，正在准备模型。";}
+                else recipeView.note="设置已换回，但开关记录没能清掉，请再点一次关闭。";
+                Log("[033 tuning] off: before-state submitted (mode %u), SR model %u, frame generation %s",
+                    before.recipe.regional,before.srModel,before.frameGeneration&&state.mfgAvailable?"restored":"unchanged");
+            }
+        }
+    }
     if(edits.close)runtime->open_overlay(false,reshade::api::input_source::mouse);
     carrier::PollConfig();
 #endif

@@ -1,6 +1,7 @@
 #include <pch.h>
 #include <Config.h>
 #include <Util.h>
+#include <integration/Core033.h>
 
 #include "DLSSFeature.h"
 
@@ -241,6 +242,12 @@ void DLSSFeature::ProcessInitParams(NVSDK_NGX_Parameter* InParameters)
         State::Instance().dlssPresetsOverridenByOpti = false;
     }
 
+    // S32 (033 panel 超分模型): what this creation asks NGX for (0 = the game's own presets).
+    Core033::RecordSrCreation(Config::Instance()->RenderPresetOverride.value_or_default()
+                                  ? Config::Instance()->RenderPresetForAll.value_or_default()
+                                  : 0u,
+                              State::Instance().dlssPresetsOverriddenExternally);
+
     UINT perfQ = NVSDK_NGX_PerfQuality_Value_Balanced;
     if (InParameters->Get(NVSDK_NGX_Parameter_PerfQualityValue, &perfQ) == NVSDK_NGX_Result_Success &&
         perfQ == NVSDK_NGX_PerfQuality_Value_UltraQuality)
@@ -275,6 +282,9 @@ void DLSSFeature::ReadVersion()
         LOG_INFO("DLSS v{0}.{1}.{2} loaded.", _version.major, _version.minor, _version.patch);
     else
         LOG_WARN("Failed to get version using NVSDK_NGX_GetSnippetVersion!");
+
+    // S32 (033 panel 超分模型): L and M need the DLSS 310.5 snippet or newer.
+    Core033::RecordSrVersion(_version.major, _version.minor, _version.patch);
 }
 
 DLSSFeature::DLSSFeature(unsigned int handleId, NVSDK_NGX_Parameter* InParameters) : IFeature(handleId, InParameters)

@@ -1248,6 +1248,8 @@ function Invoke-033ManagedOperation {
     }
     $GameExe=@($resolvedExe|Sort-Object -Unique)
     $GameExe=@(Get-033YanYunTargets $GameExe -IncludeSiblings:($Action -in @('Plan','Install','Survey'))) 
+    # S39：国际版（wwm.exe）的目录还没逐个核对过，「净化后安装」先不开放；安装 / 升级 / 还原照常。
+    if($Clean -and $Action -in @('Plan','Install')){Assert-033YanYunCleanSupported $GameExe}
     # 2026-09-17 Fable（5.0 并列目录）：只给了一个入口、又还没被本安装器登记过时，同一游戏的并列二进制目录一起进同一个安装组。
     $twinText=''
     if($Action -in @('Plan','Install','Survey') -and $GameExe.Count -eq 1){

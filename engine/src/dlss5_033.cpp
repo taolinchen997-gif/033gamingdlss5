@@ -889,6 +889,7 @@ extern "C" __declspec(dllexport) int __cdecl K033_AfterUpscale(const k033core::F
 // 2026-09-12 移植：这条血统本来不认识随包转接件，而面板要按「转接件在不在」决定显示哪张帧生成卡片。
 #include "mfg2030_bridge.h"
 #include "mfg/mfg_body.inl"
+#include "yanyun_sr_model.h" // S32: 超分模型 (the game's own DLSS preset), stored per user
 #ifdef K033_BETA2_RESHADE_HOST
 extern "C" int __cdecl K033_Beta2InitializeVendor();
 // The managed ReShade factory bootstrap calls this after shared settings are
@@ -902,6 +903,7 @@ extern "C" __declspec(dllexport) int __cdecl K033_Beta2EarlyInitialize(){
     // initialization or any MFG/SDK call. Never replace a foreign cached owner.
     if(reshade::internal::get_current_module_handle(self)!=self)return -2;
     const int result=K033_Beta2InitializeVendor();if(result!=0)return result;
+    srmodel033::ApplyStored(); // S32: before the game creates DLSS; the vendor config exists now
     mfg::early_attach(self);return 0;
 }
 #endif

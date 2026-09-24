@@ -1,8 +1,10 @@
 #include "config_store.h"
 #if defined(K033_BETA2_RESHADE_HOST)
 #include "beta2_shared_settings.h"
+#include "yanyun_hotkey_store.h"
 #endif
 #include <algorithm>
+#include <atomic>
 #include "exposure_policy.h"
 #include "nr_feature_policy.h"
 #include "nr_skin_policy.h"
@@ -181,7 +183,7 @@ struct Cfg
     // ★残差放大滤波★ 0 = 双线性(出厂, 跟全生态一致) / 1 = Lanczos3(更锐, 会出噪点)
     int   resample         = 0;
     int   ui_correct       = 1;      // 界面校正
-    int   hotkey           = 0x7A;   // 总开关热键：Shift+F11（这里存 F11 的虚拟键码 122，Shift 在 HotkeyTick 里要求）。
+    int   hotkey           = 0x7A;   // 总开关热键：默认 F11（虚拟键码 122），单按；S37 起玩家可在面板换键。
     // ★就地插入★ 1=钩住游戏自己的 DLSS, 在那里做神经渲染(跟上一版同一个位置)
     // 0=老做法, 在交换链后缓冲上做(那张图已经色调映射+后处理+UI 了)
     // 只对【游戏自带 DLSS】的游戏有意义; 其他游戏没有更干净的输入可拿。
@@ -267,7 +269,7 @@ static bool shared_ready=false;
 static K033_Settings shared_grade{};
 static K033_NrSettings shared_nr{};
 static void SharedLoad(){
-    cfg.enabled=0;cfg.hotkey=0x7A;
+    cfg.enabled=0;cfg.hotkey=hotkey033::Load(); // S37: the player's own key, F11 unless chosen otherwise
     // Model-only skin strength follows structure; removed pre-NR controls stay off.
     cfg.skin_structure=-1;cfg.extra[0].skin=cfg.extra[1].skin=-1;
     if(k033beta2::Initial(shared_grade,shared_nr)!=K033_OK)return;
@@ -1640,7 +1642,8 @@ static void RefreshGuides(effect_runtime *rt, device *dev_api)
 }
 
 // ------------------------------------------------------------ 总开关
-// 一个组合键开关整套神经渲染。默认 Shift+F11(业主 2026-09-13: 单按 F11 在不少游戏里是全屏/菜单键, 误触就把 NR 关了)。
+// 一个键开关整套神经渲染: F11。燕云定制版 S35 (业主 2026-09-24:「另外开启是F11，不是shift+f11」)
+// 去掉了 2026-09-13 通用版为防误触加的 Shift —— 面板、安装器一直写的是 F11, 燕云里单按 F11 才对得上。
 // Steam 默认 F12 截图保持独立；其他自定义冲突可以在
 // dlss5-033.cfg 里改 hotkey=<VK十进制码>, 比如 F10 是 121, F11 是 122。
 // ★★这一局 033 到底是不是引擎★★ (2026-09-05 业主实测:「F12 还是会唤起 033, 很恐怖」)
@@ -1663,7 +1666,7 @@ static void Toggle()
     if(rendercore::Integrated()) {
         cfg.enabled = cfg.enabled ? 0 : 1;
         if(cfg.enabled)g.need_reset = true;
-        Log("[033 hotkey] integrated NR %s vk=%d",cfg.enabled?"on":"off",cfg.hotkey);
+        Log("[033 hotkey] integrated NR %s vk=%d (single key, no Shift)",cfg.enabled?"on":"off",cfg.hotkey);
         return;
     }
     // ★★主插件在驾驶时, 一律不许把我们叫醒★★
@@ -1698,14 +1701,32 @@ static void Toggle()
 }
 
 // 边沿触发: 只在"刚按下"那一帧动一次, 按住不会连发
+static bool g_hotkey_was_down = false;
+// S37 (业主「另外快捷键能改」): 面板换键。新键要先松开一次才生效 —— 选键时按下的那一下不算开关。
+static void SetHotkey(int vk)
+{
+    cfg.hotkey = vk;
+    g_hotkey_was_down = true;
+}
+// S39 (业主「F11的热键修改有问题，有些键不能用」): 字母、数字也能当开关键了。面板在等新键、或者面板里
+// 有输入框正在打字时, 这一下不算开关; 面板关了(250 ms 没画)就不再拦。
+static std::atomic<unsigned long long> g_hotkey_panel_ms{0};
+static std::atomic<bool> g_hotkey_panel_blocks{false};
+static void HotkeyPanelFrame(bool blocks)
+{
+    g_hotkey_panel_blocks.store(blocks);
+    g_hotkey_panel_ms.store(GetTickCount64());
+}
 static void HotkeyTick()
 {
-    static bool was_down = false;
     if (cfg.hotkey <= 0) return;
-    const bool down = (GetAsyncKeyState(cfg.hotkey) & 0x8000) != 0 &&
-                      (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;   // Shift+F11, 单按 F11 不再响应
-    if (down && !was_down) Toggle();
-    was_down = down;
+    const bool down = (GetAsyncKeyState(cfg.hotkey) & 0x8000) != 0;   // 单按(按着 Shift 也一样, F9 除外)
+    const bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+    DWORD owner = 0;                                                    // 只认游戏窗口在前台时按的
+    if (HWND front = GetForegroundWindow()) GetWindowThreadProcessId(front, &owner);
+    const bool panelBlocks = g_hotkey_panel_blocks.load() && GetTickCount64() - g_hotkey_panel_ms.load() < 250;
+    if (hotkey033::Fires(cfg.hotkey, down, g_hotkey_was_down, owner == GetCurrentProcessId(), shift, panelBlocks)) Toggle();
+    g_hotkey_was_down = down;
 }
 
 // 每帧回调里那些 return 全是静默的, 用户永远停在「启动中」, 日志一个字没有,

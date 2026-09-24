@@ -45,7 +45,7 @@ static studio033::Edits Frame(studio033::State& s,studio033::View& view){
  studio033::Edits e;yyEdits={};ImGuiWindow* window=nullptr;{studio033::Theme theme;
  ImGui::Begin(fitMode?"033 fit":"033 CPU",nullptr,ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoSavedSettings|(fitMode?0:ImGuiWindowFlags_NoResize));
  {studio033::BeginBody();if(visualEvidenceMode)ImGui::SetScrollY(0);if(view.page!=7)studio033::Header(s,view,e);
- if(columnsMode&&view.page==0)studio033::RecipePre(s,yyView,yyEdits);else if(columnsMode&&view.page==5)studio033::RecipeSr(s,yyView,yyEdits);else if(columnsMode&&view.page==1)studio033::RecipeColumns(s,yyView,yyEdits);else if(view.page==7){studio033::MonitorState m;m.gpu="NVIDIA GeForce RTX · CPU 示例数据";m.fpsValid=m.loadValid=m.memoryValid=m.nrValid=m.recognitionValid=true;m.fps=72;m.load=86;m.memoryGiB=9.2;m.budgetGiB=15.1;m.nrMs=6.2;m.recognitionMs=4.8;m.maskAge=22;m.regionalFrames=864;m.fg=6;m.status="示例：人物与场景处理中";studio033::MonitorBody(m);}else if(view.page==6)studio033::RecipePanel(s,yyView,yyEdits);else if(view.page==0)studio033::Picture(s,e);else if(view.page==1)studio033::Model(s,view,e);else if(view.page==2)studio033::FrameGeneration(s,e);else if(view.page==3)studio033::InputNormalization(s,e);else if(view.page==5)studio033::InternalSr(s,view,e);if(columnsMode)studio033::RecipeFooter(s,e);else studio033::Footer(s,e);studio033::EndBody();}
+ if(columnsMode&&view.page==0)studio033::RecipePre(s,yyView,yyEdits);else if(columnsMode&&view.page==5)studio033::RecipeSr(s,yyView,yyEdits);else if(columnsMode&&view.page==1)studio033::RecipeColumns(s,yyView,yyEdits);else if(view.page==7){studio033::MonitorState m;m.gpu="NVIDIA GeForce RTX · CPU 示例数据";m.fpsValid=m.loadValid=m.memoryValid=m.nrValid=m.recognitionValid=true;m.fps=72;m.load=86;m.memoryGiB=9.2;m.budgetGiB=15.1;m.nrMs=6.2;m.recognitionMs=4.8;m.maskAge=22;m.regionalFrames=864;m.fg=6;m.status="示例：人物与场景处理中";studio033::MonitorBody(m);}else if(view.page==6)studio033::RecipePanel(s,yyView,yyEdits);else if(view.page==0)studio033::Picture(s,e);else if(view.page==1)studio033::Model(s,view,e);else if(view.page==2){if(s.bridgePresent||s.gpuGen==20||s.gpuGen==30)studio033::Bridge2030(s,e);else studio033::FrameGeneration(s,e);}else if(view.page==3)studio033::InputNormalization(s,e);else if(view.page==5)studio033::InternalSr(s,view,e);if(columnsMode)studio033::RecipeFooter(s,e);else studio033::Footer(s,e);studio033::EndBody();}
  window=ImGui::GetCurrentWindow();ImGui::End();}ImGui::Render();Check(ImGui::GetDrawData()!=nullptr,"UI draw lists available");
  if(rasterFile){panel_cpu_raster(rasterFile,window);rasterFile=nullptr;}return e;
 }
@@ -53,7 +53,7 @@ static studio033::Edits Click(studio033::State& s,studio033::View& view,const ch
  for(int settle=0;settle<3;++settle){Frame(s,view);if(items.count(id))break;}
  if(!items.count(id))printf("MISSING %s page=%d\n",id,view.page);Check(items.count(id)>0,"control absent");auto pt=items.at(id);pt.x+=offsetX;auto& io=ImGui::GetIO();
  io.AddMousePosEvent(pt.x,pt.y);Frame(s,view);io.AddMouseButtonEvent(0,true);const auto pressed=Frame(s,view);
- io.AddMouseButtonEvent(0,false);auto released=Frame(s,view);released.changed|=pressed.changed;released.toggle|=pressed.toggle;return released;
+ io.AddMouseButtonEvent(0,false);auto released=Frame(s,view);released.changed|=pressed.changed;released.toggle|=pressed.toggle;released.tuning|=pressed.tuning;return released;
 }
 
 static void DraftCases(){
@@ -378,6 +378,111 @@ int main(){try{
   Check(yyView.draft.regional==0&&items.count("yy_count_0_1")&&items.count("yy_fold_1")&&items.count("yy_fold_2")&&!items.count("yy_count_1_1")&&!items.count("yy_count_2_1"),"whole mode did not fold both regional banks");
   Check(!std::memcmp(bankBefore.values,yyView.draft.values,sizeof bankBefore.values),"fold discarded parameter bank");
   rasterFile="yanyun-s3-whole-cpu.bmp";Frame(s,view);
+  {// S32 模式二 (owner: 「之前的叫模式一，现在改的叫模式二」): switch, columns per page, 超分模型 row.
+   const ImVec2 display=io.DisplaySize;io.DisplaySize={1260,2200};const auto modeBefore=yyView.draft;
+   Click(s,view,"yy_mode_regional");Check(yyView.draft.regional==1,"人物 / 场景 starts in mode 1");
+   Frame(s,view);Check(items.count("yy_partition_1")&&items.count("yy_partition_2"),"mode 1 / mode 2 switch missing under 人物 / 场景");
+   Click(s,view,"yy_partition_2");Check(yyView.draft.regional==2&&yyView.dirty&&!yyEdits.applyWhole,"mode 2 chosen as an unapplied draft");
+   Check(!std::memcmp(modeBefore.values,yyView.draft.values,sizeof modeBefore.values),"mode switch changed column values");
+   yyView.opened[0]=0;yyView.opened[1]=-1;yyView.opened[2]=1;
+   io.DisplaySize={1260,1250};for(int i=0;i<3;++i)Frame(s,view);rasterFile="yanyun-s32-mode2-nr-cpu.bmp";Frame(s,view);io.DisplaySize={1260,2200};for(int i=0;i<3;++i)Frame(s,view);
+   Check(!items.count("yy_fold_0")&&!items.count("yy_fold_1")&&!items.count("yy_fold_2"),"mode 2 NR page folded a column it renders");
+   Check(items.count("yy_layer_0_1")&&!items.count("yy_layer_0_2")&&!items.count("yy_layer_0_3")&&!items.count("yy_count_0_1"),"mode 2 whole column: only its first layer, no layer count");
+   char skinKey[48];std::snprintf(skinKey,sizeof(skinKey),"yy_value_0_%u",unsigned(Skin));Check(items.count(skinKey)!=0,"mode 2: skin options stay with the whole column's first layer");
+   char blendKey[48];std::snprintf(blendKey,sizeof(blendKey),"yy_value_1_%u",unsigned(Blend));
+   Check(!items.count("yy_count_1_1")&&!items.count("yy_layer_1_1")&&items.count(blendKey),"mode 2 character column: composition only");
+   Check(items.count("yy_count_2_1")&&items.count("yy_count_2_3")&&!items.count("yy_layer_2_1")&&items.count("yy_layer_2_2")&&items.count("yy_layer_2_3"),"mode 2 scene column: layer count and layers 2-3 only");
+   const auto blendBefore=yyView.draft;Click(s,view,blendKey,24);
+   Check(yanyunrecipe::Get(blendBefore,yanyunrecipe::Character,Blend)!=yanyunrecipe::Get(yyView.draft,yanyunrecipe::Character,Blend)&&
+    !std::memcmp(blendBefore.values[0],yyView.draft.values[0],sizeof blendBefore.values[0])&&!std::memcmp(blendBefore.values[2],yyView.draft.values[2],sizeof blendBefore.values[2]),"mode 2 character blend edited another bank");
+   Click(s,view,"page_1");Check(view.page==5,"SR tab");for(int i=0;i<3;++i)Frame(s,view);
+   yyView.srApplied=13;yyView.srMajor=310;yyView.srMinor=6;io.DisplaySize={1260,1000};for(int i=0;i<3;++i)Frame(s,view);rasterFile="yanyun-s32-mode2-sr-cpu.bmp";Frame(s,view);
+   // S33 linkage (S36: L = Quality). S34: no render size line once the game has its size; the hint stays while it has not asked again.
+   yyView.srApplied=12;yyView.srModel=12;yyView.srQueries=7;yyView.srRenderW=3011;yyView.srRenderH=1270;yyView.srForcedMilli=1500;yyView.srSizePending=false;
+   for(int i=0;i<3;++i)Frame(s,view);Check(items.count("yy_sr_model")!=0,"SR model row lost after the game took its size");rasterFile="yanyun-s34-no-size-line-cpu.bmp";Frame(s,view);
+   yyView.srSizePending=true;for(int i=0;i<3;++i)Frame(s,view);Check(items.count("yy_sr_model")!=0,"SR model row lost with the pending hint");rasterFile="yanyun-s33-size-pending-cpu.bmp";Frame(s,view);
+   yyView.srApplied=srmodelabi::None;yyView.srModel=0;yyView.srQueries=yyView.srRenderW=yyView.srRenderH=yyView.srForcedMilli=0;yyView.srSizePending=false;
+   yyView.srMajor=yyView.srMinor=0;io.DisplaySize={1260,2200};for(int i=0;i<3;++i)Frame(s,view);
+   {// S35 (owner 2026-09-24): 033特调 beside the big 033, drawn like it; a click only requests the switch.
+    const bool light=yyappearance::light;const ImVec2 display=io.DisplaySize;io.DisplaySize={1260,1000};
+    for(const bool on:{false,true})for(const bool lit:{true,false}){
+     s.tuningOn=on;yyappearance::light=lit;for(int i=0;i<3;++i)Frame(s,view);
+     Check(items.count("yy_033_tuning")&&items.count("theme_dark")&&items.count("page_0"),"033 tuning badge missing");
+     const auto badge=items.at("yy_033_tuning");
+     Check(badge.x>164*ImGui::GetFontSize()/16&&badge.x<items.at("theme_dark").x&&badge.y<items.at("page_0").y,"033 tuning badge beside the lettering, left of the theme switch, above the tabs");
+     static char name[64];std::snprintf(name,sizeof(name),"yanyun-s35-tuning-%s-%s-cpu.bmp",on?"on":"off",lit?"light":"dark");rasterFile=name;Frame(s,view);
+    }
+    s.tuningOn=false;yyappearance::light=true;
+    const auto clicked=Click(s,view,"yy_033_tuning");Check(clicked.tuning&&!clicked.toggle,"033 tuning click requests the switch only");
+    io.DisplaySize={400,900};for(int i=0;i<3;++i)Frame(s,view);
+    Check(items.count("yy_033_tuning")&&items.at("yy_033_tuning").y<items.at("page_0").y,"narrow panel: the 033 tuning badge on its own row, above the tabs");
+    rasterFile="yanyun-s35-tuning-narrow-cpu.bmp";Frame(s,view);
+    yyappearance::light=light;io.DisplaySize=display;for(int i=0;i<3;++i)Frame(s,view);
+   }
+   {// S37 (owner 2026-09-24: 「另外快捷键能改」): the NR key button in the footer; click, then press the key.
+    const ImVec2 display=io.DisplaySize;io.DisplaySize={1260,1000};s.hotkey=0x7A;for(int i=0;i<3;++i)Frame(s,view);
+    Check(items.count("yy_nr_key")&&!std::strcmp(studio033::nrKeyName,"F11"),"NR key button shows F11");
+    auto press=[&](ImGuiKey key){io.AddKeyEvent(key,true);const auto down=Frame(s,view);io.AddKeyEvent(key,false);const auto up=Frame(s,view);return down.hotkey>=0?down.hotkey:up.hotkey;};
+    auto button=[&](int b){io.AddMouseButtonEvent(b,true);const auto down=Frame(s,view);io.AddMouseButtonEvent(b,false);const auto up=Frame(s,view);return down.hotkey>=0?down.hotkey:up.hotkey;};
+    Click(s,view,"yy_nr_key");Check(studio033::keyCapture,"a click waits for the new key");
+    // S39 (owner: 「F11的热键修改有问题，有些键不能用」): a key that cannot be used says why and the panel keeps waiting.
+    Check(press(ImGuiKey_Home)<0&&studio033::keyCapture&&studio033::keyRefusal&&items.count("yy_nr_key_refused"),"Home (opens the panel) is not taken and says why");
+    rasterFile="yanyun-s39-nr-key-refused-cpu.bmp";Frame(s,view);
+    Check(press(ImGuiKey_Pause)<0&&studio033::keyCapture&&studio033::keyRefusal,"Pause is not taken");
+    Check(press(ImGuiKey_Escape)<0&&!studio033::keyCapture&&!studio033::keyRefusal,"Esc cancels and clears the reason");
+    Click(s,view,"yy_nr_key");rasterFile="yanyun-s37-nr-key-waiting-cpu.bmp";Frame(s,view);
+    Check(!items.count("yy_nr_key_refused"),"no reason shown before a refused key");
+    Check(press(ImGuiKey_F8)==0x77&&!studio033::keyCapture,"F8 chosen");
+    s.hotkey=0x77;for(int i=0;i<3;++i)Frame(s,view);Check(!std::strcmp(studio033::nrKeyName,"F8"),"the footer lines follow the new key");
+    rasterFile="yanyun-s37-nr-key-cpu.bmp";Frame(s,view);
+    for(const auto& c:{std::pair<ImGuiKey,int>{ImGuiKey_F9,0x78},{ImGuiKey_F10,0x79},{ImGuiKey_N,0x4E},{ImGuiKey_7,0x37},{ImGuiKey_GraveAccent,0xC0},{ImGuiKey_UpArrow,0x26},{ImGuiKey_KeypadAdd,0x6B}}){
+     Click(s,view,"yy_nr_key");Check(press(c.first)==c.second&&!studio033::keyCapture,"S39: letters, digits, symbols, F9, F10, arrows and the keypad are taken");}
+    Click(s,view,"yy_nr_key");Check(press(ImGuiKey_LeftShift)<0&&studio033::keyRefusal,"Shift alone says why");
+    Check(press(ImGuiKey_A)==0x41&&!studio033::keyRefusal,"then a letter is taken and the reason goes away");
+    for(const auto& c:{std::pair<int,int>{2,0x04},{3,0x05},{4,0x06}}){Click(s,view,"yy_nr_key");Check(button(c.first)==c.second&&!studio033::keyCapture,"S39: the middle and side mouse buttons are taken");}
+    Click(s,view,"yy_nr_key");Check(button(1)<0&&studio033::keyCapture,"a right click is not taken");Check(press(ImGuiKey_Escape)<0&&!studio033::keyCapture,"Esc cancels");
+    s.hotkey=0x05;for(int i=0;i<3;++i)Frame(s,view);Check(!std::strcmp(studio033::nrKeyName,"鼠标侧键1"),"a side mouse button is named on the panel");
+    rasterFile="yanyun-s39-nr-key-mouse-cpu.bmp";Frame(s,view);
+    yyappearance::english=true;for(int i=0;i<3;++i)Frame(s,view);Check(!std::strcmp(studio033::nrKeyName,"Mouse 4"),"and in English");yyappearance::english=false;
+    s.hotkey=0x7A;io.DisplaySize=display;for(int i=0;i<3;++i)Frame(s,view);
+   }
+   {// S38 (owner 2026-09-24: 「30系反应是游戏里面帧生成选项都没有」): the FG page names what hides the option on RTX 20/30.
+    const ImVec2 display=io.DisplaySize;const int page=view.page;io.DisplaySize={1260,900};view.page=2;
+    s.gpuGen=30;s.bridgePresent=false;s.hags=1;s.osBuild=19045;for(int i=0;i<3;++i)Frame(s,view);
+    Check(items.count("fg_conditions_missing")&&items.count("bridge_absent")&&!items.count("bridge_engine"),"30 series without the bridge and GPU scheduling: both named");
+    rasterFile="yanyun-s38-fg-30-missing-cpu.bmp";Frame(s,view);
+    s.bridgePresent=true;s.bridgeProvider=true;s.bridgeMode=2;for(int i=0;i<3;++i)Frame(s,view); // v0.504 carries its providers inside the loader
+    Check(items.count("fg_conditions_missing")&&items.count("bridge_engine")&&!items.count("bridge_absent"),"30 series with the bridge but GPU scheduling off: named above the bridge card");
+    s.hags=2;s.osBuild=26200;for(int i=0;i<3;++i)Frame(s,view);
+    Check(items.count("fg_conditions_ok")&&!items.count("fg_conditions_missing"),"30 series with everything in place: the log is the next step");
+    rasterFile="yanyun-s38-fg-30-ok-cpu.bmp";Frame(s,view);
+    s.hags=0;s.osBuild=18363;for(int i=0;i<3;++i)Frame(s,view);Check(items.count("fg_conditions_missing")!=0,"unknown scheduling and an old Windows are named");
+    s.gpuGen=40;s.bridgePresent=false;for(int i=0;i<3;++i)Frame(s,view);
+    Check(!items.count("fg_conditions_missing")&&!items.count("fg_conditions_ok"),"40 series: no RTX 20/30 conditions");
+    s.gpuGen=0;s.hags=0;s.osBuild=0;s.bridgeMode=-1;s.bridgeProvider=false;view.page=page;io.DisplaySize=display;for(int i=0;i<3;++i)Frame(s,view);
+   }
+   char work0[48],work1[48],work2[48],pass2[48];std::snprintf(work0,sizeof(work0),"yy_value_0_%u",unsigned(Work));std::snprintf(work1,sizeof(work1),"yy_value_1_%u",unsigned(Work));
+   std::snprintf(work2,sizeof(work2),"yy_value_2_%u",unsigned(Work));std::snprintf(pass2,sizeof(pass2),"yy_value_2_%u",unsigned(PassWork));
+   Check(items.count(work0)&&!items.count(work1)&&!items.count(work2)&&items.count(pass2),"mode 2 SR: the whole column sizes the first layer, the scene layers 2-3, the character nothing");
+   Check(items.count("yy_sr_model")!=0,"SR model row missing");
+   Click(s,view,"yy_sr_model");Frame(s,view);Check(items.count("yy_sr_model_0")&&items.count("yy_sr_model_3"),"SR model choices missing");
+   Click(s,view,"yy_sr_model_2");Check(yyEdits.srModel==13&&yyView.srModel==13,"M not requested");
+   // A DLSS older than 310.5 cannot take M or L; K stays available.
+   yyView.srModel=0;yyView.srMajor=310;yyView.srMinor=4;Click(s,view,"yy_sr_model");Frame(s,view);Click(s,view,"yy_sr_model_2");
+   Check(yyEdits.srModel<0&&yyView.srModel==0,"M offered on a DLSS without the second-generation models");
+   Frame(s,view);if(!items.count("yy_sr_model_1")){Click(s,view,"yy_sr_model");Frame(s,view);}
+   Click(s,view,"yy_sr_model_1");Check(yyEdits.srModel==11,"K must stay available on older DLSS");
+   yyView.srMajor=yyView.srMinor=0;yyView.srModel=0;Frame(s,view);
+   Click(s,view,"page_0");Check(view.page==0,"pre tab");for(int i=0;i<3;++i)Frame(s,view);
+   char grade1[48];std::snprintf(grade1,sizeof(grade1),"yy_value_1_%u",unsigned(Grade));
+   Check(items.count("yy_fold_0")&&items.count(grade1),"mode 2 pre-grade page: character and scene columns like mode 1");
+   Click(s,view,"page_2");Check(view.page==1,"NR tab");
+   Click(s,view,"yy_mode_whole");Check(yyView.draft.regional==0,"whole picture");
+   Click(s,view,"yy_mode_regional");Check(yyView.draft.regional==2,"人物 / 场景 returns to the partition mode used last");
+   Click(s,view,"yy_partition_1");Check(yyView.draft.regional==1,"back to mode 1");Frame(s,view);
+   Check(items.count("yy_fold_0")&&items.count("yy_count_1_1")&&items.count("yy_layer_2_1"),"mode 1 layout restored");
+   yyView.draft=modeBefore;yyView.dirty=false;yyView.partition=1;yyView.opened[0]=yyView.opened[1]=yyView.opened[2]=0;io.DisplaySize=display;for(int i=0;i<3;++i)Frame(s,view);
+  }
   Click(s,view,"page_3");Check(view.page==2,"FG is not fourth tab");
   columnsMode=false;
   view.page=7;io.DisplaySize={380,730};for(int i=0;i<3;++i)Frame(s,view);rasterFile="yanyun-monitor-cpu.bmp";Frame(s,view);

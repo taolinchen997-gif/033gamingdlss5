@@ -11,7 +11,17 @@ struct Bank {
  exposure::FrameMeter exposure;
  scale::Blitter blit;ComPtr<ID3D12RootSignature> blendSignature;ComPtr<ID3D12PipelineState> blendPipeline; // borrowed from Pipelines (S19)
  unsigned inputSignature=0;bool inputSignatureValid=false; // person-only history key (S18)
+ bool firstLayer=false; // S32 模式二: no person NR; finishes the chain's own first layer
  ~Bank(){for(auto& f:feature)nrfwd::release(f,false);exposure::DestroyFrames(exposure);}
+};
+// S32 模式二: the rendered chain's first layer as the person look's source. All of it
+// belongs to the chain's frame lease; the person pass only reads it.
+struct SharedLayer {
+ ID3D12Resource* output=nullptr;     // first layer's NR answer (model size, resident UAV)
+ ID3D12Resource* encoded=nullptr;    // the chain's encoded input (model size, readable)
+ ID3D12Resource* modelInput=nullptr; // what the first layer was given (encoded or stabilised)
+ unsigned w=0,h=0;DXGI_FORMAT format=DXGI_FORMAT_UNKNOWN;
+ float fixedWhite=1.f;ID3D12Resource* white=nullptr;int curve=0;float diffuseWhite=203.f; // the chain's encoding
 };
 // S19: the compiled person pipelines (scale/resolve set + blend) are created once
 // and shared by every person bank and the mask view for the process lifetime;
@@ -32,6 +42,7 @@ inline unsigned PersonInputSignature(const carrier::Cfg& cfg){
 }
 inline Bank* active=nullptr;inline Bank* building=nullptr;inline Bank* maskView=nullptr;inline std::vector<Bank*> retired;
 inline ComPtr<ID3D12Device> wantedDevice;inline unsigned wantW=0,wantH=0,wantGw=0,wantGh=0;inline DXGI_FORMAT wantFormat=DXGI_FORMAT_UNKNOWN;
+inline unsigned wantModelW=0,wantModelH=0;inline DXGI_FORMAT wantModelFormat=DXGI_FORMAT_UNKNOWN; // S32: the chain's first layer
 inline ComPtr<ID3D12CommandQueue> buildQueue;inline ComPtr<ID3D12CommandAllocator> buildAllocator;
 inline ComPtr<ID3D12GraphicsCommandList> buildList;inline ComPtr<ID3D12Fence> buildFence;inline UINT64 buildValue=0;
 inline UINT64 memoryUsage=0,memoryBudget=0;
@@ -43,12 +54,14 @@ inline uint64_t ConfigKey(const carrier::Cfg& cfg,unsigned w,unsigned h,unsigned
  mix(nrlayers::Signature(cfg)); // Only model creation settings require another NR bank.
  return hash;
 }
-inline void Want(ID3D12Device* dev,unsigned w,unsigned h,unsigned gw,unsigned gh,DXGI_FORMAT fmt,UINT64 usage,UINT64 budget){
+inline void Want(ID3D12Device* dev,unsigned w,unsigned h,unsigned gw,unsigned gh,DXGI_FORMAT fmt,UINT64 usage,UINT64 budget,
+ unsigned modelW,unsigned modelH,DXGI_FORMAT modelFormat){
  memoryUsage=usage;memoryBudget=budget;
  if(!RecognitionRequested(enabled,previewMask.load()))return;
  if(wantedDevice&&!identity033::Equal(wantedDevice.Get(),dev)){note="人物处理设备已变化，请重启游戏";return;}
- wantedDevice=dev;wantW=w;wantH=h;wantGw=gw;wantGh=gh;wantFormat=fmt;
+ wantedDevice=dev;wantW=w;wantH=h;wantGw=gw;wantGh=gh;wantFormat=fmt;wantModelW=modelW;wantModelH=modelH;wantModelFormat=modelFormat;
 }
+inline uint64_t WantedSharedKey(){return SharedKey(wantW,wantH,wantModelW,wantModelH,unsigned(wantFormat),unsigned(wantModelFormat));}
 inline ComPtr<ID3D12Resource> Texture(ID3D12Device* dev,unsigned w,unsigned h,DXGI_FORMAT fmt,D3D12_RESOURCE_STATES state=D3D12_RESOURCE_STATE_UNORDERED_ACCESS){
  D3D12_HEAP_PROPERTIES heap{};heap.Type=D3D12_HEAP_TYPE_DEFAULT;D3D12_RESOURCE_DESC desc{};
  desc.Dimension=D3D12_RESOURCE_DIMENSION_TEXTURE2D;desc.Width=w;desc.Height=h;desc.DepthOrArraySize=1;desc.MipLevels=1;desc.Format=fmt;desc.SampleDesc.Count=1;
@@ -83,7 +96,16 @@ inline void EnsureBlit(ID3D12Device* dev){
  Log("[033 YY S19 pipelines] person scale/resolve pipelines compiled once; shared by all person banks");
 }
 inline void BuildBank(Bank& bank){
- auto* dev=bank.device.Get();bank.count=std::clamp(bank.cfg.passes,1,3);
+ auto* dev=bank.device.Get();
+ if(bank.firstLayer){
+  // S32 模式二: no person NR features. A finish target at the chain's model size and
+  // the person composition targets at output size; the model is the chain's own.
+  EnsureBlit(dev);bank.blit=shared.blit;UseBlend(bank);bank.count=0;
+  bank.finish=Texture(dev,bank.size[0].w,bank.size[0].h,bank.modelFormat);
+  bank.resolved=Texture(dev,bank.w,bank.h,bank.format);bank.clarity=Texture(dev,bank.w,bank.h,bank.format);bank.combined=Texture(dev,bank.w,bank.h,bank.format);
+  return;
+ }
+ bank.count=std::clamp(bank.cfg.passes,1,3);
  bank.modelFormat=bank.format==DXGI_FORMAT_R32G32B32A32_FLOAT?bank.format:DXGI_FORMAT_R16G16B16A16_FLOAT;
  EnsureBlit(dev);bank.blit=shared.blit;UseBlend(bank);
  for(int i=0;i<bank.count;++i){
@@ -106,7 +128,8 @@ inline void PumpBuild(){
   const auto done=buildFence->GetCompletedValue();if(done==UINT64_MAX){buildPoisoned=true;note="人物模型初始化设备失效";return;}
   if(done<buildValue)return;
   if(active)retired.push_back(active);active=building;building=nullptr;note="人物模型已就绪，等待识别结果";
-  Log("[033 YY person] bank initialized; %d independent NR layers; %ux%u; not game-accepted",active->count,active->w,active->h);
+  if(active->firstLayer)Log("[033 YY S32 mode 2] person bank initialized; no person NR pass: the person look is the chain's first layer (model %ux%u) with the person column's composition; output %ux%u; not game-accepted",active->size[0].w,active->size[0].h,active->w,active->h);
+  else Log("[033 YY person] bank initialized; %d independent NR layers; %ux%u; not game-accepted",active->count,active->w,active->h);
  }
  if(!enabled&&active){retired.push_back(active);active=nullptr;}
  if(!RecognitionRequested(enabled,previewMask.load())&&maskView){retired.push_back(maskView);maskView=nullptr;}
@@ -120,10 +143,15 @@ inline void PumpBuild(){
   if(Worker().Status()<0){note="人物识别失败，分区未生效，详见日志";return;}
  }
  if(!enabled||!wantedDevice||!wantW||!wantH||!retired.empty()||GetTickCount64()<retryAfter)return;
- const auto key=ConfigKey(person,wantW,wantH,wantGw,wantGh,wantFormat);
+ // S32 模式二: the person bank only finishes the chain's first layer, so it follows the
+ // chain's model size and never the person column's (unused) model settings.
+ const bool firstLayer=SharedFirstLayerMode();
+ if(firstLayer&&(!wantModelW||!wantModelH||wantModelFormat==DXGI_FORMAT_UNKNOWN)){note="等待第 1 层模型就绪";return;}
+ const auto key=firstLayer?WantedSharedKey():ConfigKey(person,wantW,wantH,wantGw,wantGh,wantFormat);
  if(active&&active->key==key)return;
- const auto estimate=EstimateBytes(wantW,wantH,wantGw,wantGh,person.modelfull!=0,person.work,person.passwork,person.passwork3,person.passes);
- if(!estimate){note="人物 SR 精度超出模型尺寸上限，请降低精度后应用";return;}
+ const auto estimate=firstLayer?SharedEstimateBytes(wantW,wantH,wantModelW,wantModelH):
+  EstimateBytes(wantW,wantH,wantGw,wantGh,person.modelfull!=0,person.work,person.passwork,person.passwork3,person.passes);
+ if(!estimate){note=firstLayer?"第 1 层尺寸超出范围，分区尚未生效":"人物 SR 精度超出模型尺寸上限，请降低精度后应用";return;}
  if(!memoryBudget){note="等待显存预算信息，分区尚未生效";return;}
  if(!FitsBudget(memoryUsage,memoryBudget,estimate)){
   // The mismatched bank cannot be published. Retire it by exact lease proof,
@@ -134,6 +162,7 @@ inline void PumpBuild(){
  // Do not retire a live bank until a complete replacement is initialized.
  // A failed command submission is quarantined permanently, never guessed idle.
  Bank* bank=nullptr;try{bank=new Bank;}catch(...){note="人物参数内存分配失败";return;}bank->device=wantedDevice;bank->cfg=person;bank->w=wantW;bank->h=wantH;bank->gw=wantGw;bank->gh=wantGh;bank->format=wantFormat;bank->key=key;
+ if(firstLayer){bank->firstLayer=true;bank->size[0]={wantModelW,wantModelH};bank->modelFormat=wantModelFormat;}
  bool armed=false;
  try{
   if(!buildQueue){D3D12_COMMAND_QUEUE_DESC q{};q.Type=D3D12_COMMAND_LIST_TYPE_DIRECT;
@@ -221,23 +250,55 @@ inline ID3D12Resource* RenderPerson(Bank& b,ID3D12GraphicsCommandList* cl,resolv
  scale::Barrier(cl,b.resolved.Get(),D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
  b.lastFrame=frame;return b.clarity.Get();
 }
+// S32 模式二 (owner: 「全局——人物一层后遮罩（不渲染）」): the person look is the rendered
+// chain's own first layer. The same finish / composition / clarity steps as the tail
+// of RenderPerson, but no person NR evaluation: the NR answer, its input and the
+// encoding (white, curve) are the chain's; the composition values are the person
+// column's. The first layer's output arrives in its resident UAV state and leaves in it.
+inline ID3D12Resource* RenderShared(Bank& b,ID3D12GraphicsCommandList* cl,resolveleases::Slot* lease,
+ ID3D12Resource* original,const SharedLayer& layer,ID3D12Resource* motion,const nrcontract::Guides* guides,float sx,float sy,int resolveMode){
+ auto* dev=b.device.Get();scale::Blitter blit=b.blit;blit.heap=lease->heap;blit.white_bound=nullptr;
+ const auto& cfg=b.cfg;auto grade=pregrade::Checked(&cfg.pre);grade.skinProtection=0;
+ auto motionSharpen=MotionSettings(cfg,motion,guides,sx,sy);
+ const float protection=nrskin::Protection(1); // the person region stops after one layer
+ scale::Barrier(cl,layer.output,D3D12_RESOURCE_STATE_UNORDERED_ACCESS,D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+ scale::DispatchResolve(blit,dev,cl,layer.encoded,layer.encoded,layer.output,layer.format,b.finish.Get(),layer.w,layer.h,
+  1.f,1.f,3.f,1,1.f,0.f,nullptr,4,0,0,1,0.f,203.f,nullptr,nullptr,protection,0.f,UINT(nrstack::FinalBase));
+ scale::Barrier(cl,layer.output,D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+ scale::Barrier(cl,b.finish.Get(),D3D12_RESOURCE_STATE_UNORDERED_ACCESS,D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+ scale::DispatchResolve(blit,dev,cl,original,layer.modelInput,b.finish.Get(),b.format,b.resolved.Get(),b.w,b.h,
+  cfg.blend/100.f,layer.fixedWhite,cfg.guard,resolveMode,cfg.colour,0.f,layer.white,cfg.replica?1:cfg.compose,cfg.resample,layer.curve,1,0.f,layer.diffuseWhite,&motionSharpen,&grade,
+  protection,cfg.skin_lift,UINT(4));
+ scale::Barrier(cl,b.finish.Get(),D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+ scale::Barrier(cl,b.resolved.Get(),D3D12_RESOURCE_STATE_UNORDERED_ACCESS,D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+ scale::DispatchResolve(blit,dev,cl,b.resolved.Get(),b.resolved.Get(),b.resolved.Get(),b.format,b.clarity.Get(),b.w,b.h,
+  cfg.natural_look,1.f,cfg.guard,resolveMode,1.f,cfg.sharpen,nullptr,5,0,0,1,0.f,layer.diffuseWhite,nullptr,nullptr,0.f,0.f,UINT(nrstack::ClarityBase));
+ scale::Barrier(cl,b.resolved.Get(),D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+ return b.clarity.Get();
+}
 inline ID3D12Resource* Composite(ID3D12Device* dev,ID3D12GraphicsCommandList* cl,
  ID3D12Resource* original,ID3D12Resource* scene,ID3D12Resource* depth,ID3D12Resource* motion,ID3D12Resource* white,
- const nrcontract::Guides* guides,int inverted,bool reset,float sx,float sy,int encode,int resolveMode,const FrameIdentity& frame) noexcept {
+ const nrcontract::Guides* guides,int inverted,bool reset,float sx,float sy,int encode,int resolveMode,const FrameIdentity& frame,
+ const SharedLayer* firstLayer=nullptr) noexcept {
  const bool preview=previewMask.load();
  if(!RecognitionRequested(enabled,preview))return scene;
  if(buildPoisoned)return nullptr;
+ // S32 模式二: the person look needs the chain's first layer of THIS frame.
+ const bool shareFirst=SharedFirstLayerMode();
+ if(shareFirst&&!preview&&!(firstLayer&&firstLayer->output&&firstLayer->encoded&&firstLayer->modelInput&&firstLayer->w&&firstLayer->h)){
+  note="等待第 1 层结果，暂用场景效果";return scene;}
  // S18: a person bank awaiting replacement keeps rendering with the settings it
  // was built with (as the scene's hot switch does) instead of withholding the
  // whole regional result for the entire rebuild. Only a missing bank or a
  // geometry/format mismatch withholds composition.
  const bool bankFits=active&&active->w==wantW&&active->h==wantH&&active->gw==wantGw&&active->gh==wantGh&&
-  active->format==wantFormat&&frame.width==wantW&&frame.height==wantH;
+  active->format==wantFormat&&frame.width==wantW&&frame.height==wantH&&active->firstLayer==shareFirst&&
+  (!shareFirst||(firstLayer&&active->size[0].w==firstLayer->w&&active->size[0].h==firstLayer->h&&active->modelFormat==firstLayer->format));
  // S30: nothing to compose (no person bank for this geometry yet) shows the scene
  // look, not the game's original picture.
  if(!CanComposite(preview,maskView&&maskView->w==frame.width&&maskView->h==frame.height,bankFits))return scene;
  auto& b=*(preview?maskView:active);
- const bool bankCurrent=preview||b.key==ConfigKey(person,wantW,wantH,wantGw,wantGh,wantFormat);
+ const bool bankCurrent=preview||b.key==(shareFirst?WantedSharedKey():ConfigKey(person,wantW,wantH,wantGw,wantGh,wantFormat));
  if(!preview&&bankCurrent)b.cfg=person; // Dynamic grade/mix/sharpen values do not rebuild model memory.
  // The CPU still decides WHETHER to compose (identity + age of the newest mask it
  // can see) and the fade weight; WHICH mask is used is decided later on the GPU
@@ -294,6 +355,9 @@ inline ID3D12Resource* Composite(ID3D12Device* dev,ID3D12GraphicsCommandList* cl
    b.blit.rs,b.blit.pso,b.blit.rs_rv,b.blit.pso_rv,b.blit.pso_stack,b.blendSignature.Get(),b.blendPipeline.Get(),blendHeap};
   for(auto* object:late::Objects())refs.push_back(object);
   for(int i=0;i<b.count;++i){refs.push_back(b.input[i].Get());refs.push_back(b.output[i].Get());}
+  // S32 模式二: the chain's first layer is read here too; lease it for this pass as well.
+  if(shareFirst&&!preview)for(auto* object:{static_cast<IUnknown*>(firstLayer->output),static_cast<IUnknown*>(firstLayer->encoded),static_cast<IUnknown*>(firstLayer->modelInput)})
+   if(std::find(refs.begin(),refs.end(),object)==refs.end())refs.push_back(object);
   NestedLease scope;scope.slot=resolveleases::Begin(dev,cl,refs.data(),refs.size(),&b,leasewait033::Owner::NR);
   if(!scope.slot){note="等待人物处理资源退休，暂用场景效果";return scene;}
   blend.Bind(resolveleases::GetTicket(scope.slot));
@@ -306,10 +370,15 @@ inline ID3D12Resource* Composite(ID3D12Device* dev,ID3D12GraphicsCommandList* cl
   // by cause: shared stream/rectangle/hold change, its own input encoding, or
   // a composite missing in between (RenderPerson resets on a frame gap).
   static uint64_t personFrames=0,resetShared=0,resetOwnInput=0,resetGap=0;
-  if(!preview){++personFrames;if(reset)++resetShared;else if(personReset)++resetOwnInput;if(b.lastFrame&&b.lastFrame+1!=frame.frame)++resetGap;}
-  auto* character=preview?original:RenderPerson(b,cl,scope.slot,original,depth,motion,white,guides,inverted,personReset,sx,sy,encode,resolveMode,frame.frame,frame.stream);
+  if(!preview&&!shareFirst){++personFrames;if(reset)++resetShared;else if(personReset)++resetOwnInput;if(b.lastFrame&&b.lastFrame+1!=frame.frame)++resetGap;}
+  // S32 模式二: no person NR pass and no person history; the person look is the
+  // chain's first layer composed with the person column's values.
+  auto* character=preview?original:shareFirst?RenderShared(b,cl,scope.slot,original,*firstLayer,motion,guides,sx,sy,resolveMode):
+   RenderPerson(b,cl,scope.slot,original,depth,motion,white,guides,inverted,personReset,sx,sy,encode,resolveMode,frame.frame,frame.stream);
   if(!character)return nullptr;
-  if(!preview){b.inputSignature=inputSignature;b.inputSignatureValid=true;}
+  if(!preview&&!shareFirst){b.inputSignature=inputSignature;b.inputSignatureValid=true;}
+  static unsigned sharedLogs=0;
+  if(shareFirst&&!preview&&sharedLogs<3){++sharedLogs;Log("[033 YY S32 mode 2] composite recorded: person look = the chain's first layer %ux%u finished with the person column's composition; scene look = the full chain; no person NR evaluation",firstLayer->w,firstLayer->h);}
   const auto inc=dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
   const auto cpu=blendHeap->GetCPUDescriptorHandleForHeapStart();const auto gpu=blendHeap->GetGPUDescriptorHandleForHeapStart();
   late::FillDescriptors(dev,cpu,inc,nullptr,DXGI_FORMAT_UNKNOWN);

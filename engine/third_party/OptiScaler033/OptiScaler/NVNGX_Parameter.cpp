@@ -4,6 +4,7 @@
 
 #include "SysUtils.h"
 #include "Config.h"
+#include <integration/Core033.h>
 #include <ankerl/unordered_dense.h>
 #include <misc/IdentifyGpu.h>
 #include <framegen/nvngx/Nvngx_FG.h>
@@ -406,6 +407,9 @@ NVSDK_NGX_Result NVSDK_CONV NVSDK_NGX_DLSS_GetOptimalSettingsCallback(NVSDK_NGX_
 
     LOG_DEBUG("Display Resolution: {0}x{1}", Width, Height);
 
+    // S33 (033 超分模型 linkage): read before the answer is computed; see Core033.cpp.
+    const uint32_t ratioSequence033 = Core033::SrRatioSequence();
+
     const std::optional<float> QualityRatio = GetQualityOverrideRatio(enumPQValue);
 
     if (QualityRatio.has_value())
@@ -540,6 +544,7 @@ NVSDK_NGX_Result NVSDK_CONV NVSDK_NGX_DLSS_GetOptimalSettingsCallback(NVSDK_NGX_
 
     LOG_DEBUG("NVSDK_NGX_DLSS_GetOptimalSettingsCallback: Display Resolution: {0}x{1} Render Resolution: {2}x{3}",
               Width, Height, OutWidth, OutHeight);
+    Core033::RecordSrQuery(Width, Height, OutWidth, OutHeight, (uint32_t) PerfQualityValue, ratioSequence033);
     return NVSDK_NGX_Result_Success;
 }
 

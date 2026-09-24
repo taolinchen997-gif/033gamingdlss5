@@ -8,11 +8,15 @@ rows=[]
 layer_source=(source/'engine/src/hostnr.h').read_text(encoding='utf-8-sig')
 layers='static bool BuildLayerCandidate(' in layer_source
 (out/'fault_features.inc').write_text(f'#define NR_LAYER_FAULT_TEST {int(layers)}\n#define NR_RECOVERY_TEST {int("static bool EnsureBlitter(" in layer_source)}\n',encoding='utf8')
-def section(rel,start,end,name):
+def section(rel,start,end,name,last=None):
     p=source/rel
     if rel=='engine/src/command_lifetime.h':p=root/'src/command_lifetime.h' # unchanged shared completion predicate
     raw=p.read_bytes();text=raw.decode('utf-8-sig').replace('\r\n','\n');assert text.count(start)==1,(rel,start)
-    a=text.index(start);b=text.index(end,a);chunk=text[a:b]
+    a=text.index(start);b=text.index(end,a)
+    # Stop after the function `last` when newer code follows it before `end`
+    # (YanYun S32 put the SR model state after ApiCapabilities).
+    if last:b=min(b,text.index('\n}\n',text.index(last,a))+3)
+    chunk=text[a:b]
     line=text[:a].count('\n')+1
     (out/name).write_text(f'#line {line} "{p.as_posix()}"\n'+chunk,encoding='utf8')
     rows.append(dict(source=str(p),sourceSha256=hashlib.sha256(raw).hexdigest(),startLine=line,
@@ -21,7 +25,8 @@ section('engine/third_party/OptiScaler033/OptiScaler/integration/Core033.cpp','s
 section('engine/third_party/OptiScaler033/OptiScaler/integration/Core033.cpp','bool Claim(uint32_t owner)', 'bool UsesHost()', 'fault_claim.inc')
 cap=(source/'engine/third_party/OptiScaler033/OptiScaler/integration/Core033.cpp').read_text(encoding='utf-8-sig')
 cap_start='static void* CapabilitiesImpl(' if 'static void* CapabilitiesImpl(' in cap else 'static void* __cdecl ApiCapabilities('
-section('engine/third_party/OptiScaler033/OptiScaler/integration/Core033.cpp',cap_start,'}\nextern "C" __declspec(dllexport) const k033core::Api*', 'fault_capabilities.inc')
+section('engine/third_party/OptiScaler033/OptiScaler/integration/Core033.cpp',cap_start,'}\nextern "C" __declspec(dllexport) const k033core::Api*', 'fault_capabilities.inc',
+    last='static void* __cdecl ApiCapabilities(')
 section('engine/src/nrfwd.h','static NVSDK_NGX_Result core_create_guarded(', '// guideW/guideH','fault_create.inc')
 section('engine/src/nrfwd.h','static bool release_core_guarded(', '// ── 「这是我们自己发的调用」', 'fault_release.inc')
 section('engine/src/nrfwd.h','static int evaluate(', 'static bool release_core_guarded(', 'fault_evaluate.inc')

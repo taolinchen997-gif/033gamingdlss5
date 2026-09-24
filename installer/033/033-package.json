@@ -154,7 +154,7 @@
         {
           "Source": "payload/exclusive/033-runtime/033-engine.dll",
           "Target": "033-runtime/033-engine.dll",
-          "Hash": "3bf7d7f04c3c71929073e54f164759c85a7e1874be3b8191ac8d19d1a3bc28c0",
+          "Hash": "f126c5149d8deadd6ad5b1a3f1f1b0f19fd358610c104d3fdb4b209a13d556a5",
           "Architecture": "x64",
           "Policy": "replace",
           "Role": "engine"
@@ -327,7 +327,8 @@
         "033-runtime"
       ],
       "ExecutableNames": [
-        "yysls.exe"
+        "yysls.exe",
+        "wwm.exe"
       ],
       "Suitability": {
         "Apis": [
@@ -370,7 +371,7 @@
       }
     }
   ],
-  "Version": "B站@热心网友033-燕云定制版-V6.2",
+  "Version": "B站@热心网友033-燕云领先版-V6.2.1",
   "Notices": [
     {
       "Source": "notices/bundled/FaceDetect033/LICENSE",
@@ -686,7 +687,7 @@
     },
     {
       "Source": "notices/THIRD_PARTY_NOTICES.md",
-      "Hash": "29b507f463b9e98fbff0537ee051b8bce948193c529b1c220f7729c90cbce02d"
+      "Hash": "e8e9b3c20f6081b5ca1a3f58628895b87934435591ee4d149cec521a611d5d85"
     },
     {
       "Source": "notices/YOLO11/LICENSE",
@@ -710,6 +711,6 @@
   "ReleaseContract": {
     "Schema": 1,
     "Source": "033-components.json",
-    "Hash": "e9c74243abd08f5f64cb8ac7f277422c5f21f4697b87194387d8d7c6db0659c2"
+    "Hash": "8380980a578c290e2e84ebc669bd854d1c3b1923973a5c7c91ea82602b69edc3"
   }
 }

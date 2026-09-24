@@ -23,7 +23,7 @@ template<class C>void ApplyGrade(C& c,const K033_Settings& s){
  c.pre.saturation=s.saturation;c.pre.warmth=s.warmth;c.pre.tint=s.tint;c.pre.highlights=s.highlights;c.pre.styleStrength=s.style_strength;c.pre.skinProtection=0;
 }
 template<class C>void ApplyNr(C& c,const K033_NrSettings& s){
- c.enabled=int(s.enabled);c.passes=int(s.layers);c.hotkey=0x7A;
+ c.enabled=int(s.enabled);c.passes=int(s.layers); // S37: the NR key is the player's own (hotkey.cfg), not shared
  c.skin_structure=s.skin_structure[0];c.extra[0].skin=s.skin_structure[1];c.extra[1].skin=s.skin_structure[2];c.skin_lift=s.skin_lift;c.sharpen=s.final_clarity;c.natural_look=s.natural_look;
  if(s.sr_work[0])c.work=int(s.sr_work[0]);
  if(s.sr_work[1])c.passwork=int(s.sr_work[1]);

@@ -1,6 +1,6 @@
 {
   "Schema": 1,
-  "Release": "B站@热心网友033-燕云定制版-V6.2",
+  "Release": "B站@热心网友033-燕云领先版-V6.2.1",
   "Profiles": {
     "yanyun-exclusive-x64": {
       "Family": "yanyun-native-s4",
@@ -148,7 +148,7 @@
         {
           "Source": "payload/exclusive/033-runtime/033-engine.dll",
           "Target": "033-runtime/033-engine.dll",
-          "Hash": "3bf7d7f04c3c71929073e54f164759c85a7e1874be3b8191ac8d19d1a3bc28c0",
+          "Hash": "f126c5149d8deadd6ad5b1a3f1f1b0f19fd358610c104d3fdb4b209a13d556a5",
           "Architecture": "x64",
           "Policy": "replace",
           "Role": "engine"
@@ -354,7 +354,7 @@
     "yanyun-native-s4": {
       "Architecture": "x64",
       "Api": "dx12",
-      "CoreSHA256": "3bf7d7f04c3c71929073e54f164759c85a7e1874be3b8191ac8d19d1a3bc28c0",
+      "CoreSHA256": "f126c5149d8deadd6ad5b1a3f1f1b0f19fd358610c104d3fdb4b209a13d556a5",
       "HostSHA256": "418e69676aa2168fcbffdde2e6409b4448e07507a007369e7b9dd8ed2bb7bf59",
       "NativeFgMax": 6,
       "NRMaxLayersPerBranch": 3,

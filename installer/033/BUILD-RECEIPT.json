@@ -1,8 +1,8 @@
 {
-  "Version": "B站@热心网友033-燕云定制版-V6.2",
-  "CoreSHA256": "3bf7d7f04c3c71929073e54f164759c85a7e1874be3b8191ac8d19d1a3bc28c0",
+  "Version": "B站@热心网友033-燕云领先版-V6.2.1",
+  "CoreSHA256": "f126c5149d8deadd6ad5b1a3f1f1b0f19fd358610c104d3fdb4b209a13d556a5",
   "HostSHA256": "418e69676aa2168fcbffdde2e6409b4448e07507a007369e7b9dd8ed2bb7bf59",
-  "ManifestSHA256": "9ed5fb12542210251b2515c0df30ed91c9d555d6d64b1308d06b5142555a10c4",
-  "ComponentCatalogSHA256": "e9c74243abd08f5f64cb8ac7f277422c5f21f4697b87194387d8d7c6db0659c2",
+  "ManifestSHA256": "ecdb053a10ff6c56708e199922632d720aa0d452b4c31d7b383f6e794a366160",
+  "ComponentCatalogSHA256": "8380980a578c290e2e84ebc669bd854d1c3b1923973a5c7c91ea82602b69edc3",
   "Source": "https://github.com/taolinchen997-gif/033gamingdlss5"
 }

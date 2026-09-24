@@ -858,12 +858,19 @@ static void PumpBuild()
     if(s_retry_cool>0){BuildWait("上次模型准备失败，等待重试");return;}
     // Bound overlap to active + one retired/candidate bank. No resource release
     // based on elapsed time, and no need to blank current NR while waiting.
-    const bool drainResize=nrresize033::DrainBeforeBuild(
-        nrinput033::ownership.Get()==nrinput033::Route::Presentation,s_feat!=nullptr,
+    // An old-size model renders nothing; when the new one cannot fit beside it,
+    // retire it first instead of waiting for memory (S34).
+    const bool presentationRoute=nrinput033::ownership.Get()==nrinput033::Route::Presentation;
+    SampleMemory(s_want_dev);
+    const bool overlapFits=nrresize033::OverlapFits(s_memory_usage,s_memory_budget,
+        nrresize033::CreationBytes(s_want_w,s_want_h,s_want_gw,s_want_gh,carrier::cfg.passes));
+    const bool drainResize=nrresize033::DrainBeforeBuild(presentationRoute,s_feat!=nullptr,
         {s_dev,s_w,s_h,s_built_gw,s_built_gh,int(s_fmt)},
-        {s_want_dev,s_want_w,s_want_h,s_want_gw,s_want_gh,int(carrier::TypedColorFormat(s_want_fmt))});
+        {s_want_dev,s_want_w,s_want_h,s_want_gw,s_want_gh,int(carrier::TypedColorFormat(s_want_fmt))},overlapFits);
     if(!nrresize033::Prepare(drainResize,[&]{
-            Log("[hostnr resize] retiring old model %ux%u before %ux%u creation; pending GPU/list leases must retire",s_w,s_h,s_want_w,s_want_h);
+            Log("[hostnr resize] retiring old model %ux%u guide %ux%u before %ux%u guide %ux%u creation (%s); pending GPU/list leases must retire",
+                s_w,s_h,s_built_gw,s_built_gh,s_want_w,s_want_h,s_want_gw,s_want_gh,
+                presentationRoute?"presentation route":"new model does not fit beside it");
             Release();
         },[]{ParkTick();},[]{return AnyParkedFeature();})){
         BuildWait(s_feat?"等待旧模型资源回收，设置尚未应用":"正在回收旧尺寸模型，游戏画面继续");return;
@@ -873,13 +880,7 @@ static void PumpBuild()
     ID3D12Device* dev=s_want_dev;
     if(!EnsureBlitter(dev)){BuildWait("NR 资源准备失败，正在自动重试");return;}
     if(!EnsureBuilder(dev)){BuildWait("模型准备队列不可用");return;}
-    SampleMemory(dev);
-    const UINT64 thirdBoundW=(std::max)(UINT64(64),UINT64((std::max)(s_want_w,s_want_gw))*2u);
-    const UINT64 thirdBoundH=(std::max)(UINT64(64),UINT64((std::max)(s_want_h,s_want_gh))*2u);
-    const UINT64 thirdInputBound=thirdBoundW*thirdBoundH*16u;
-    const UINT64 estimated=UINT64(s_want_w)*s_want_h*(64u+128u*(std::max)(1,carrier::cfg.passes))+
-        (carrier::cfg.passes>2?thirdInputBound:0u); // Up to RGBA32F; first NR dimensions may be 200% per axis.
-    if(s_feat && s_memory_budget && (s_memory_usage>=s_memory_budget || estimated>s_memory_budget-s_memory_usage)){
+    if(s_feat && !overlapFits){
         BuildWait("显存余量不足，未创建新模型；当前模型继续运行");return;
     }
     if(FAILED(s_ba->Reset()) || FAILED(s_bl->Reset(s_ba,nullptr))){BuildWait("模型准备命令重置失败");return;}
@@ -1044,7 +1045,7 @@ static int __cdecl Stage(ID3D12GraphicsCommandList *cl, ID3D12Device *dev,
         }
         if(!s_feat || geom_ready)return 0;
     }
-    yanyundual::Want(dev,w,h,now_gw,now_gh,s_fmt,s_memory_usage,s_memory_budget);
+    yanyundual::Want(dev,w,h,now_gw,now_gh,s_fmt,s_memory_usage,s_memory_budget,s_sw,s_sh,s_model_fmt);
     if (s_grace > 0) { --s_grace; return 0; }
 
     // restorestate 开着时，没有捕获到可完整还原的计算态就整帧跳过，绝不猜绑。
@@ -1540,9 +1541,14 @@ static int __cdecl Stage(ID3D12GraphicsCommandList *cl, ID3D12Device *dev,
         },[&](ID3D12Resource* src){scale::Barrier(cl,src,D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,D3D12_RESOURCE_STATE_UNORDERED_ACCESS);});
     if(yanyundual::RecognitionRequested(yanyundual::enabled,yanyundual::previewMask.load())){
         // S20-S22: the masks are latched, aligned along the recorded motion, voted and feathered on the GPU inside Composite.
+        // S32 模式二: the person look is this chain's own first layer (s_out, resident UAV;
+        // s_small / resolve_in readable), encoded exactly like the scene look above.
+        const yanyundual::SharedLayer firstLayer{s_out,s_small,resolve_in,s_sw,s_sh,s_model_fmt,
+            carrier::EffectiveWhite(),frame_white,carrier::EffectiveCurve(),carrier::cfg.diffuse_white};
         auto* mixed=yanyundual::Composite(dev,cl,s_full,finalOutput,depth,mv,frame_white,
             s_have_frame_guides?&s_frame_guides:nullptr,depthInverted,personReset,mvScaleX,mvScaleY,enc,
-            carrier::ResolveMode(s_fmt,nrinput033::context.presentation),personFrame);
+            carrier::ResolveMode(s_fmt,nrinput033::context.presentation),personFrame,
+            yanyundual::SharedFirstLayerMode()?&firstLayer:nullptr);
         if(!mixed){
             // S30: Composite returns the scene look itself when there is nothing
             // to compose; nullptr now means a failed composite only (build

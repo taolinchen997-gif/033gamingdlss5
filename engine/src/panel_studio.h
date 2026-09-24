@@ -9,6 +9,7 @@
 #include "panel_c4_visual.h"
 #include "panel_yanyun_visual.h"
 #include "panel_draft_state.h"
+#include "yanyun_hotkey.h"
 
 namespace studio033 {
 using namespace nrcontrolsabi;
@@ -44,10 +45,18 @@ struct State {
     // 2026-09-12 移植自 P1 树：随包第三方转接件 nvidia_mfg_bridge 的文件事实与它 INI 里的值。
     unsigned gpuGen=0;bool gameFrameGen=false,bridgePresent=false,bridgeLegacy=false,bridgeProvider=false,bridgeSaved=false,bridgeSaveFailed=false;
     int bridgeMode=-1,bridgeForce=0;char bridgeLoader[32]={};
+    bool tuningOn=false; // S35 033特调 (the before-file exists)
+    unsigned hags=0,osBuild=0; // S38: Windows GPU scheduling 0 unknown / 1 off / 2 on; Windows build (0 unknown)
 };
 inline constexpr Id Appearance[]={Style,Intensity,Structure,LocalTone,AutoMask,UiCorrect,Preset,GlobalTone,Skin};
 struct View {bool maximized=false;ImVec2 restoreSize{},restorePos{};int page=1,layer=0,srLayer=0;paneldraft::Fields<Count> drafts;};
-struct Edits {uint64_t changed=0;uint64_t revisions[Count]{};bool maximize=false,toggle=false,neutral=false,portrait=false,save=false,recover=false,mfg=false,close=false,bridge=false,resetHistory=false;unsigned multiplier=0;int bridgeMode=-1,bridgeForce=-1;};
+struct Edits {uint64_t changed=0;uint64_t revisions[Count]{};bool maximize=false,toggle=false,neutral=false,portrait=false,save=false,recover=false,mfg=false,close=false,bridge=false,resetHistory=false,tuning=false;unsigned multiplier=0;int bridgeMode=-1,bridgeForce=-1,hotkey=-1;};
+// S37: the NR key's name for the footer lines (set from the controls in Header), and whether the
+// panel is waiting for the player to press a new one.
+inline char nrKeyName[16]="F11";
+inline bool keyCapture=false;
+// S39: why the key just pressed while waiting cannot be the NR key (null: nothing to say).
+inline const char* keyRefusal=nullptr;
 // Preview harness observes real item rectangles; production leaves this null.
 using Observe=void(*)(const char*,ImVec2,ImVec2);
 inline Observe observer=nullptr;
@@ -102,7 +111,7 @@ inline void EndBody(){
     if(oneLine){
         // The hotkey line keeps the body size, centred on the larger author line.
         const float x=ImGui::GetCursorPosX();ImGui::SetCursorPosY(lineY+(std::max)(0.f,(authorSize.y-F())*.5f));
-        ImGui::TextDisabled("F11  NR    Shift+F9  %s",yyappearance::Text("监控","Monitor"));ImGui::SameLine();ImGui::SetCursorPos(ImVec2(x+w-authorSize.x-1,lineY));
+        ImGui::TextDisabled("%s  NR    Shift+F9  %s",nrKeyName,yyappearance::Text("监控","Monitor"));ImGui::SameLine();ImGui::SetCursorPos(ImVec2(x+w-authorSize.x-1,lineY));
     }
     ImGui::PushFont(nullptr,AuthorSize());ImGui::PushStyleColor(ImGuiCol_Text,visual::accent());
     // Measured to fit: never wrap it at the edge (float rounding split it in two).
@@ -211,6 +220,7 @@ inline bool HeaderSegment(const char* key,const char* label,bool selected){
     if(selected)ImGui::PopStyleColor();return pressed;
 }
 inline void Header(State& s,View& view,Edits& e){
+    {const char* key=hotkey033::Name(int(s.hotkey));std::snprintf(nrKeyName,sizeof(nrKeyName),"%s",key?L(key):"F11");}
     fit.maximized=view.maximized;if(view.page!=fit.page){fit.page=view.page;RequestFit();}
     const float f=F(),w=ImGui::GetContentRegionAvail().x;auto* dl=ImGui::GetWindowDrawList();
     const float u=visual::unit(),x0=ImGui::GetCursorPosX(),gap=.6f*f,glyph=ImGui::GetFrameHeight();
@@ -219,7 +229,22 @@ inline void Header(State& s,View& view,Edits& e){
     const char* dark=yyappearance::Text("黑色","Dark");const char* light=yyappearance::Text("白色","Light");
     const float controls=HeaderSegmentWidth(dark)+HeaderSegmentWidth(light)+gap+HeaderSegmentWidth("中")+HeaderSegmentWidth("EN")+gap+3*glyph;
     const bool sameRow=w-controls-gap>=90*u; // otherwise the controls take their own row
-    visual::brand_mark(sameRow?(std::max)(1.f,(std::min)(164*u,w-controls-gap)):(std::min)(164*u,w));
+    // S35 (owner 2026-09-24): 「启用033特调，放在大标志033旁边」. Beside the lettering when both
+    // fit, otherwise on its own row under the edition name.
+    const char* tuningLabel=L("特调");const float badgeH=34*u,badgeW=visual::tuning_badge_width(badgeH,tuningLabel);
+    const float room=sameRow?w-controls-gap:w;const bool badgeBeside=room-badgeW-gap>=100*u;
+    const float logo=(std::max)(1.f,(std::min)(164*u,badgeBeside?room-badgeW-gap:room));
+    auto badge=[&]{
+        if(visual::tuning_badge("##yy_033_tuning",tuningLabel,s.tuningOn,badgeH))e.tuning=true;ObserveItem("yy_033_tuning");
+        Tip(s.tuningOn?L("033特调已启用。再点一下关闭，回到开启前你自己的设置；开启期间改过的参数不保留。"):
+            L("启用033特调：一键换成 033 调好的整套参数（前置、SR、NR，超分模型 L、帧生成 6×；20、30 系超分模型用 K，帧生成倍率不动）。再点一下回到开启前你自己的设置。"));
+    };
+    visual::brand_mark(logo);
+    if(badgeBeside){
+        // Centred on the lettering, which brand_mark draws 4..58 units down its 64-unit row.
+        const float scale=(std::min)(logo/164.f,u),drop=(std::max)(0.f,31*scale-badgeH*.5f-ImGui::GetStyle().ItemSpacing.y);
+        ImGui::SameLine(0,gap);ImGui::BeginGroup();ImGui::Dummy(ImVec2(1,drop));badge();ImGui::EndGroup();
+    }
     if(sameRow)ImGui::SameLine(x0+w-controls,0);else ImGui::SetCursorPosX(x0+(std::max)(0.f,w-controls));
     if(HeaderSegment("theme_dark",dark,!yyappearance::light))yyappearance::SetLight(false);ImGui::SameLine(0,0);
     if(HeaderSegment("theme_light",light,yyappearance::light))yyappearance::SetLight(true);ImGui::SameLine(0,gap);
@@ -230,6 +255,7 @@ inline void Header(State& s,View& view,Edits& e){
     if(HeaderGlyph("maximize_panel",1))e.maximize=true;ImGui::SameLine(0,0);
     if(HeaderGlyph("close_panel",2))e.close=true;
     ImGui::TextDisabled("%s",yyappearance::Text(K033_PRODUCT_VERSION,"YanYun custom edition"));
+    if(!badgeBeside){Space(.1f);badge();}
     Space(.2f);
     const char* names[]={yyappearance::Text("前置","Color"),"SR","NR","FG"};static const int pages[]={0,5,1,2};
     const float bw=(std::min)(82*u,w/4);
@@ -435,13 +461,31 @@ inline void ModelDiagnostics(const State& s){
 
 }
 // DLSS-G calls. It reads dlssg_to_fsr3.ini at launch, so a choice applies after restart.
+// S38 (owner 2026-09-24: 「30系反应是游戏里面帧生成选项都没有」): on RTX 20/30 the game shows frame
+// generation only with the bridge in place, Windows' hardware-accelerated GPU scheduling on and Windows 10
+// 2004 or newer (YanYun's Streamline 2.11.1 checks the last two itself). Each missing one is named with the
+// way to fix it; with all three in place the next step is the bridge's own log.
+inline void FgConditions2030(const State& s){
+    auto problem=[](const char* text){ImGui::PushStyleColor(ImGuiCol_Text,visual::accent());ImGui::TextWrapped("%s",text);ImGui::PopStyleColor();};
+    bool ok=true;
+    if(!s.bridgePresent){ok=false;problem(L("随包的帧生成转接件没装上：用 033 安装器重新安装一次；还是没有，把安装报告发给作者。"));}
+    if(s.hags==1){ok=false;problem(L("Windows 的「硬件加速 GPU 计划」没开，游戏会把帧生成选项藏起来。打开方法：Windows 设置里搜「图形设置」，打开「硬件加速 GPU 计划」，然后重启电脑。"));}
+    else if(s.hags!=2){ok=false;problem(L("没查到「硬件加速 GPU 计划」的设置：Windows 设置里搜「图形设置」，确认它是打开的（改完要重启电脑）。"));}
+    if(s.osBuild&&s.osBuild<19041){ok=false;problem(L("Windows 版本太旧：游戏的帧生成要 Windows 10 2004 或更新。"));}
+    if(ok)ImGui::TextWrapped("%s",L("转接件已装，「硬件加速 GPU 计划」已开。游戏里还是没有帧生成选项的话：把游戏目录里 dlssg_to_fsr3.ini 的 EnableLogging 改成 1，进一次游戏，把 dlssg_to_fsr3.log 发给作者。"));
+    ObserveItem(ok?"fg_conditions_ok":"fg_conditions_missing");Space(.3f);
+}
 inline void Bridge2030(State& s,Edits& e){
     Heading(L("帧生成"));BeginCard("frame_generation_2030");
     // 2026-09-12 起 40/50 系也走这张卡（业主定：帧生成用随包转接件，回到 V5.0 的做法），文案不能再只有 20/30。
     const char* series=s.gpuGen==20?L("20 系"):s.gpuGen==30?L("30 系"):s.gpuGen==40?L("40 系"):s.gpuGen==50?L("50 系"):L("这张显卡");
+    const bool twentyThirty=s.gpuGen==20||s.gpuGen==30;
+    if(twentyThirty)FgConditions2030(s);
     if(!s.bridgePresent){
-        if(s.gameFrameGen)ImGui::TextWrapped(L("%s的多帧生成由随包的 nvidia_mfg_bridge 转接件提供。这个游戏自带 DLSS 帧生成，但目录里没有转接件；用 033 安装器重新安装即可放入。"),series);
-        else ImGui::TextWrapped(L("%s的多帧生成需要游戏自带 DLSS 帧生成，这个游戏没有。没有原生帧生成的游戏请使用兼容入口。"),series);
+        if(!twentyThirty){
+            if(s.gameFrameGen)ImGui::TextWrapped(L("%s的多帧生成由随包的 nvidia_mfg_bridge 转接件提供。这个游戏自带 DLSS 帧生成，但目录里没有转接件；用 033 安装器重新安装即可放入。"),series);
+            else ImGui::TextWrapped(L("%s的多帧生成需要游戏自带 DLSS 帧生成，这个游戏没有。"),series);
+        }
         ObserveItem("bridge_absent");EndCard();return;
     }
     const char* engines[]={L("NVIDIA 原生 DLSS-G"),"FSR3.1"};
@@ -490,7 +534,7 @@ inline void FrameGeneration(State& s,Edits& e){
     }else ImGui::TextDisabled(L("等待游戏帧生成运行库反馈"));
     if(s.gpuFrameMs>=0)ImGui::Text(L("GPU 原生帧耗时   %.1f ms"),s.gpuFrameMs);
     if(s.nrMs>=0)ImGui::Text(L("其中神经渲染   %.1f ms"),s.nrMs);
-    if(!s.mfgAvailable)ImGui::TextWrapped(L("尚未接收到可用的原生帧生成接口。无原生帧生成的游戏请查看下方兼容入口。"));
+    if(!s.mfgAvailable)ImGui::TextWrapped(L("尚未收到游戏的帧生成接口：在游戏设置里打开 DLSS 帧生成后再看。"));
     ImGui::TextWrapped(L("需要游戏自身提供 DLSS 帧生成。倍率不代表输入延迟；低延迟与其他帧生成选项位于设置。"));EndCard();
 }
 inline void InputNormalization(State& s,Edits& e){
@@ -550,7 +594,7 @@ inline void InternalSr(State& s,View& v,Edits& e){
     else if(dirty)ImGui::TextDisabled("有未提交的精度修改");
     else if(inFlight)ImGui::TextDisabled("精度已提交，等待接收");
     else if(s.modelPending)ImGui::TextWrapped("精度已提交：%s",s.modelWait[0]?s.modelWait:"等待模型准备完成");
-    ImGui::TextWrapped("Shift+F11 关闭 NR 时停止其专用 SR 新处理；保留已设精度、普通调色及补帧设置。");
+    ImGui::TextWrapped("F11 关闭 NR 时停止其专用 SR 新处理；保留已设精度、普通调色及补帧设置。");
 }
 inline void Footer(const State& s,Edits& e){Space(.6f);ImGui::Separator();Space(.3f);
     const float f=F();
@@ -559,13 +603,13 @@ inline void Footer(const State& s,Edits& e){Space(.6f);ImGui::Separator();Space(
 
     ImGui::BeginDisabled(!s.available||s.paused);
     char toggleLabel[64],keyLabel[24];
-    if(s.hotkey>=0x70&&s.hotkey<=0x87)std::snprintf(keyLabel,sizeof(keyLabel),"Shift+F%u",s.hotkey-0x70+1);
-    else std::snprintf(keyLabel,sizeof(keyLabel),"Shift+键码 %u",s.hotkey);
+    if(s.hotkey>=0x70&&s.hotkey<=0x87)std::snprintf(keyLabel,sizeof(keyLabel),"F%u",s.hotkey-0x70+1);
+    else std::snprintf(keyLabel,sizeof(keyLabel),"键码 %u",s.hotkey);
     std::snprintf(toggleLabel,sizeof(toggleLabel),"%s   %s",s.failed?"恢复 NR":s.values[Enabled]!=0?L("关闭 NR"):L("开启 NR"),keyLabel);
     if(ImGui::Button(toggleLabel,ImVec2(f*10.5f,0)))e.toggle=true;
     ObserveItem("toggle_nr");Tip("开关神经渲染。已有的超分和帧生成设置保持原值。");ImGui::EndDisabled();
 
-    ImGui::TextColored(ImColor(visual::muted()),"Home/Shift+退格 面板 · Shift+F11 NR · Shift+F10 截图");
+    ImGui::TextColored(ImColor(visual::muted()),"Home/Shift+退格 面板 · F11 NR · Shift+F10 截图");
     if(ImGui::GetContentRegionAvail().x>=30*F())ImGui::SameLine();
     if(ImGui::Button("保存设置"))e.save=true;ObserveItem("save_settings");
     Tip("已应用的参数写入燕云专属设置。画面方案草稿请使用「保存方案」。");

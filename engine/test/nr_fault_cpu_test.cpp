@@ -97,7 +97,9 @@ namespace nrdispatch {struct WriterAccess{bool entered=true;};struct LongStep{vo
 namespace nrinput033 {enum class Route{Presentation,Upscale};static struct{Route Get(){return Route::Upscale;}}ownership;}
 namespace nrresize033 {
 struct Geometry{void* dev;unsigned w,h,gw,gh;int fmt;};
-static bool DrainBeforeBuild(bool,bool,Geometry,Geometry){return false;}
+static UINT64 CreationBytes(unsigned,unsigned,unsigned,unsigned,int){return 0;}
+static bool OverlapFits(UINT64,UINT64,UINT64){return true;}
+static bool DrainBeforeBuild(bool,bool,Geometry,Geometry,bool){return false;}
 template<class A,class B,class C>bool Prepare(bool,A,B,C){return true;}
 }
 namespace scale {static int creates=0,destroys=0,failCreates=0;template<class T>bool Create(T& b,ID3D12Device*){++creates;if(failCreates){--failCreates;b.error="mock allocation failure";return false;}b.ready=true;return true;}template<class T>void Destroy(T& b){++destroys;b.ready=false;}}

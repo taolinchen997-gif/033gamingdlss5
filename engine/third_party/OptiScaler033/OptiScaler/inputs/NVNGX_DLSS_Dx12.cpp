@@ -1049,6 +1049,14 @@ static NVSDK_NGX_Result TryEvaluateOptiFeature(ID3D12GraphicsCommandList* InCmdL
     // To avoid capturing potential upscaler change (creation) and then upscaling itself
     D3D12Hooks::SetRootSignatureTracking(false);
 
+    // S32 (033 panel 超分模型): a new DLSS model was chosen. Recreate this DLSS feature
+    // once, here on the thread that owns it, the same way the upstream Apply does.
+    if (feature != nullptr && feature->GetUpscalerType() == Upscaler::DLSS && Core033::ConsumeSrRecreate())
+    {
+        state.newBackend = Upscaler::DLSS;
+        state.changeBackend[handleId] = true;
+    }
+
     // Backend change or recreation requested
     if (state.changeBackend[handleId])
     {

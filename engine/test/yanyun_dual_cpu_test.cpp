@@ -176,6 +176,16 @@ int main(){try{
  Check(FitsBudget(100,size+100,size),"exact remaining budget allowed");Check(!FitsBudget(100,size+99,size),"insufficient budget held");
  Check(!FitsBudget(UINT64_MAX,UINT64_MAX,size),"budget cannot underflow");Check(!FitsBudget(0,0,size),"unknown budget held");
  Check(!EstimateBytes(3840,2160,2560,1440,true,100,75,50,4),"fourth layer refused");
+ {// S32 模式二: the person bank holds no model, so it costs far less than any mode 1 bank.
+  const auto shared=SharedEstimateBytes(2880,1800,2214,1384);
+  Check(shared>0&&shared<EstimateBytes(2880,1800,2215,1384,false,100,100,100,1),"mode 2 person bank smaller than a one-layer mode 1 person bank");
+  Check(shared>=uint64_t(2880)*1800*16*3+uint64_t(2214)*1384*16,"mode 2 estimate covers its four targets");
+  Check(!SharedEstimateBytes(0,1800,2214,1384)&&!SharedEstimateBytes(2880,1800,0,1384)&&!SharedEstimateBytes(9000,1800,2214,1384)&&!SharedEstimateBytes(2880,1800,2214,9000),"invalid mode 2 dimensions give no estimate");
+  const auto key=SharedKey(2880,1800,2214,1384,10,10);
+  Check(key==SharedKey(2880,1800,2214,1384,10,10),"mode 2 bank identity is stable");
+  Check(key!=SharedKey(2880,1800,2216,1384,10,10)&&key!=SharedKey(2880,1800,2214,1386,10,10)&&key!=SharedKey(2880,1802,2214,1384,10,10)&&key!=SharedKey(2880,1800,2214,1384,24,10)&&key!=SharedKey(2880,1800,2214,1384,10,2),
+   "a new first-layer size, output size or format rebuilds the mode 2 person bank");
+ }
  {// S28 depth gate: only a texel clearly behind every confident person texel nearby is cleared.
   using namespace latemask;
   Check(GateTexel(.6f,.005f,.03f),"far background under the soft rim is cleared");

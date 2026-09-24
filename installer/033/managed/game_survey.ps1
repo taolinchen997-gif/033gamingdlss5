@@ -669,7 +669,7 @@ function Resolve-033GameExe([string]$Path,[string]$Vault){
     }
     [pscustomobject]@{Exe=$rows[0].Path;Input=$full;FromFolder=$true;Source='folder-scan';Candidates=@($rows|Select-Object -First 6)}
 }
-$script:K033KnownGameExeNames=@('yysls.exe','DD2.exe')
+$script:K033KnownGameExeNames=@('yysls.exe','wwm.exe','DD2.exe')
 # 2026-09-12 业主「所有游戏都要挂对，网络上全查清」：逐游戏名单 game_rules.json，由 tools/build_game_rules.py 生成
 # （ReShade 官方兼容名单 + 5.0 逐游戏表 + OptiScaler 兼容表里对得上主程序名的 + 评论区实测）。缺文件或读坏了就当没有名单。
 $script:K033GameRulesPath=Join-Path $PSScriptRoot 'game_rules.json'

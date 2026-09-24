@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Core033.h"
 #include "../../../../src/nr_fault.h"
+#include "../../../../src/sr_model_abi.h"
 #include <Config.h>
 #include <proxies/NVNGX_Proxy.h>
 #include <fstream>
@@ -107,6 +108,53 @@ static void* __cdecl ApiCapabilities(void* rawDevice){
     __try{return CapabilitiesImpl(rawDevice);}__except(EXCEPTION_EXECUTE_HANDLER){
         nrfault033::Record(GetExceptionCode(),nrfault033::Site::Capabilities);return nullptr;}
 }
+// S32 (owner 2026-09-24): 超分模型 on the 033 SR page. The choice rides on the
+// upstream preset override (DLSSFeature::ProcessInitParams, RenderPresetForAll for
+// every quality mode) as volatile values, so no OptiScaler.ini is ever written.
+// A change recreates the DLSS feature once on the evaluate thread that owns it.
+static std::atomic<uint32_t> srRequested{srmodelabi::GameDefault},srApplied{srmodelabi::None},srCreations{0},srPending{0},
+    srMajor{0},srMinor{0},srPatch{0},srExternal{0};
+static std::atomic<bool> srRecreate{false};
+void RecordSrCreation(uint32_t appliedPreset,bool external){
+    srApplied=appliedPreset;srExternal=external?1u:0u;++srCreations;srPending=0;
+}
+void RecordSrVersion(uint32_t major,uint32_t minor,uint32_t patch){srMajor=major;srMinor=minor;srPatch=patch;}
+bool ConsumeSrRecreate(){return srRecreate.exchange(false);}
+// S33 (owner: 「设L，就自动将游戏设置成超级性能」): M and L also force the render size the
+// game is told for every quality mode (upstream UpscaleRatioOverride, volatile). The game
+// takes it the next time it asks for its render size (NVSDK_NGX_DLSS_GetOptimalSettingsCallback);
+// an answer computed before the latest change keeps the size "pending".
+static std::atomic<uint32_t> srQueries{0},srOutW{0},srOutH{0},srRenderW{0},srRenderH{0},srGameMode{0},
+    srForcedMilli{0},srRatioSeq{0},srAnsweredSeq{0};
+uint32_t SrRatioSequence(){return srRatioSeq.load();}
+void RecordSrQuery(uint32_t outputW,uint32_t outputH,uint32_t renderW,uint32_t renderH,uint32_t gameMode,uint32_t ratioSequence){
+    srOutW=outputW;srOutH=outputH;srRenderW=renderW;srRenderH=renderH;srGameMode=gameMode;srAnsweredSeq=ratioSequence;++srQueries;
+}
+}
+extern "C" __declspec(dllexport) int __cdecl K033_SetSrPreset(uint32_t preset,uint32_t recreate){
+    if(!srmodelabi::Allowed(preset))return 0;
+    auto* config=Config::Instance();
+    config->RenderPresetOverride.set_volatile_value(preset!=srmodelabi::GameDefault);
+    config->RenderPresetForAll.set_volatile_value(preset);
+    const float ratio=srmodelabi::LinkedRatio(preset);const uint32_t milli=uint32_t(ratio*1000.0f+0.5f);
+    config->UpscaleRatioOverrideEnabled.set_volatile_value(ratio>0.0f);
+    if(ratio>0.0f)config->UpscaleRatioOverrideValue.set_volatile_value(ratio);
+    // Bumped after the new values are in place: an answer computed from the old ones stays pending.
+    if(Core033::srForcedMilli.exchange(milli)!=milli)++Core033::srRatioSeq;
+    const bool changed=Core033::srRequested.exchange(preset)!=preset;
+    // Before the game's first DLSS creation the values simply wait for it.
+    if(recreate && changed && Core033::srCreations.load()){Core033::srPending=1;Core033::srRecreate=true;}
+    return 1;
+}
+extern "C" __declspec(dllexport) int __cdecl K033_GetSrPresetStatus(srmodelabi::Status* out){
+    if(!out || out->size!=sizeof(srmodelabi::Status) || out->version!=2)return 0;
+    out->requested=Core033::srRequested.load();out->applied=Core033::srApplied.load();out->creations=Core033::srCreations.load();
+    out->pending=Core033::srPending.load();out->major=Core033::srMajor.load();out->minor=Core033::srMinor.load();out->patch=Core033::srPatch.load();
+    out->external=Core033::srExternal.load();
+    out->queries=Core033::srQueries.load();out->outputW=Core033::srOutW.load();out->outputH=Core033::srOutH.load();
+    out->renderW=Core033::srRenderW.load();out->renderH=Core033::srRenderH.load();out->gameMode=Core033::srGameMode.load();
+    out->forcedMilli=Core033::srForcedMilli.load();out->sizePending=Core033::srRatioSeq.load()!=Core033::srAnsweredSeq.load()?1u:0u;
+    return 1;
 }
 extern "C" __declspec(dllexport) const k033core::Api* __cdecl K033_GetRenderCore(uint32_t version){
     static const k033core::Api api{sizeof(k033core::Api),k033core::Version,Core033::ApiClaim,Core033::ApiStatus,Core033::ApiMenu,Core033::ApiEnabled,Core033::ApiCapabilities};

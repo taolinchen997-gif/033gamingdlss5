@@ -16,4 +16,13 @@ bool RequestCapture();
 bool ConsumeMenuRequest();
 bool EmbeddedUiOwned();
 const nrcontrolsabi::Api* Controls();
+// S32 (033 panel 超分模型): the DLSS SR creation reports what it asked NGX for and
+// which snippet it got; the evaluate thread consumes a requested recreation.
+void RecordSrCreation(uint32_t appliedPreset,bool external);
+void RecordSrVersion(uint32_t major,uint32_t minor,uint32_t patch);
+bool ConsumeSrRecreate();
+// S33: every render-size question the game asks (NGX optimal settings) and our answer.
+// Read the sequence before computing the answer, record it with the answer.
+uint32_t SrRatioSequence();
+void RecordSrQuery(uint32_t outputW,uint32_t outputH,uint32_t renderW,uint32_t renderH,uint32_t gameMode,uint32_t ratioSequence);
 }

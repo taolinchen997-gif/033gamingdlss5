@@ -99,14 +99,10 @@ inline bool primary_button(const char* label,ImVec2 size) {
 
 namespace studio033::visual {
 // Original continuous, chamfered 033 lettering; no font or third-party emblem.
-inline void brand_mark(float available) {
-    const auto origin=ImGui::GetCursorScreenPos();
-    const float scale=(std::min)(available/164.0f,ImGui::GetFontSize()/16.0f);
-    if(scale<=0)return;
-    auto* list=ImGui::GetWindowDrawList();
-    const auto gold=yyappearance::light?IM_COL32(30,35,38,255):IM_COL32(233,212,171,255);
-    const auto edge=yyappearance::light?IM_COL32(70,73,73,150):IM_COL32(244,226,193,150);
-    auto point=[&](float x,float y){return ImVec2(origin.x+x*scale,origin.y+(y+4)*scale);};
+// S35: the lettering alone, at any origin, scale and colour (the 033特调 badge reuses it).
+inline ImU32 brand_colour(){return yyappearance::light?IM_COL32(30,35,38,255):IM_COL32(233,212,171,255);}
+inline void brand_letters(ImDrawList* list,ImVec2 origin,float scale,ImU32 gold,ImU32 edge){
+    auto point=[&](float x,float y){return ImVec2(origin.x+x*scale,origin.y+y*scale);};
     // Adjoining quadrilaterals leave a real open counter in the zero.
     const ImVec2 outer[]={{10,0},{38,0},{48,10},{48,44},{38,54},{10,54},{0,44},{0,10}};
     const ImVec2 inner[]={{15,11},{33,11},{36,14},{36,40},{33,43},{15,43},{12,40},{12,14}};
@@ -132,6 +128,44 @@ inline void brand_mark(float available) {
         list->AddLine(point(x+1,1),point(x+48,1),edge,scale);
     }
     list->AddLine(point(10,1),point(38,1),edge,scale);
+}
+inline void brand_mark(float available) {
+    const auto origin=ImGui::GetCursorScreenPos();
+    const float scale=(std::min)(available/164.0f,ImGui::GetFontSize()/16.0f);
+    if(scale<=0)return;
+    const auto edge=yyappearance::light?IM_COL32(70,73,73,150):IM_COL32(244,226,193,150);
+    brand_letters(ImGui::GetWindowDrawList(),ImVec2(origin.x,origin.y+4*scale),scale,brand_colour(),edge);
     ImGui::Dummy(ImVec2(164*scale,64*scale));
+}
+// S35 (owner 2026-09-24): 「启用033特调，放在大标志033旁边，跟033这个logo风格差不多」. Chamfered
+// like the lettering's zero, in the lettering's colour, with the same vector 033: filled when on,
+// outlined when off, and the panel's on/off switch at the right.
+inline float tuning_text_width(float size,const char* label){
+    ImGui::PushFont(nullptr,size);const float width=ImGui::CalcTextSize(label).x;ImGui::PopFont();return width;
+}
+inline float tuning_badge_width(float h,const char* label){
+    return h*.36f+159*h*.44f/54+h*.2f+tuning_text_width(h*.5f,label)+h*.3f+h*.8f+h*.3f;
+}
+inline bool tuning_badge(const char* id,const char* label,bool on,float h){
+    const float u=unit(),w=tuning_badge_width(h,label),cut=h*.24f;
+    const auto a=ImGui::GetCursorScreenPos();const ImVec2 b(a.x+w,a.y+h);
+    const bool pressed=ImGui::InvisibleButton(id,ImVec2(w,h));
+    const bool hover=ImGui::IsItemHovered()||ImGui::IsItemFocused(),held=ImGui::IsItemActive();
+    auto* dl=ImGui::GetWindowDrawList();const ImU32 ink=brand_colour(),paper=ImGui::GetColorU32(surface());
+    const ImVec2 shape[]={{a.x+cut,a.y},{b.x-cut,a.y},{b.x,a.y+cut},{b.x,b.y-cut},{b.x-cut,b.y},{a.x+cut,b.y},{a.x,b.y-cut},{a.x,a.y+cut}};
+    if(on)dl->AddConvexPolyFilled(shape,8,ink);
+    else if(hover||held)dl->AddConvexPolyFilled(shape,8,ImGui::GetColorU32(held?selected():palette(ImVec4(.16f,.19f,.20f,1),ImVec4(.91f,.925f,.93f,1))));
+    dl->AddPolyline(shape,8,on&&hover?ImGui::GetColorU32(accent()):ink,ImDrawFlags_Closed,(hover?2.f:1.5f)*u);
+    const ImU32 content=on?paper:ink;const float s=h*.44f/54;float x=a.x+h*.36f;
+    brand_letters(dl,ImVec2(x,a.y+(h-54*s)*.5f),s,content,0);
+    x+=159*s+h*.2f;
+    const float size=h*.5f;ImGui::PushFont(nullptr,size);const ImVec2 text=ImGui::CalcTextSize(label);ImGui::PopFont();
+    const ImVec2 at(x,a.y+(h-text.y)*.5f);
+    // Drawn twice half a unit apart: the weight of the lettering beside it.
+    dl->AddText(ImGui::GetFont(),size,at,content,label);dl->AddText(ImGui::GetFont(),size,ImVec2(at.x+.5f*u,at.y),content,label);
+    x+=text.x+h*.3f;const float sw=h*.8f,sh=h*.47f;const ImVec2 t(x,a.y+(h-sh)*.5f);
+    dl->AddRectFilled(t,ImVec2(t.x+sw,t.y+sh),on?paper:ImGui::GetColorU32(palette(ImVec4(.30f,.33f,.35f,1),ImVec4(.73f,.75f,.77f,1))),sh*.5f);
+    dl->AddCircleFilled(ImVec2(on?t.x+sw-sh*.5f:t.x+sh*.5f,t.y+sh*.5f),sh*.4f,on?ink:IM_COL32(245,245,242,255),24);
+    return pressed;
 }
 }

@@ -291,6 +291,18 @@ inline uint64_t EstimateBytes(unsigned w,unsigned h,unsigned gw,unsigned gh,bool
  return bytes;
 }
 inline bool FitsBudget(uint64_t usage,uint64_t budget,uint64_t bytes){return bytes&&budget&&usage<budget&&bytes<=budget-usage;}
+// S32 模式二: the person bank holds no NR model, only the finish of the chain's first
+// layer (model size) and the person composition targets (output size).
+inline uint64_t SharedEstimateBytes(unsigned w,unsigned h,unsigned modelW,unsigned modelH){
+ if(!w||!h||!modelW||!modelH||w>8192||h>8192||modelW>8192||modelH>8192||uint64_t(w)*h>33554432||uint64_t(modelW)*modelH>33554432)return 0;
+ return uint64_t(w)*h*16*3+uint64_t(modelW)*modelH*16+64ull*1024*1024;
+}
+// Identity of a 模式二 person bank: geometry and formats only. Person model settings
+// are not rendered in 模式二, so editing them never rebuilds this bank.
+inline uint64_t SharedKey(unsigned w,unsigned h,unsigned modelW,unsigned modelH,unsigned format,unsigned modelFormat){
+ uint64_t hash=14695981039346656037ull;auto mix=[&](uint32_t u){hash=(hash^u)*1099511628211ull;};
+ mix(0x53333221u);mix(w);mix(h);mix(modelW);mix(modelH);mix(format);mix(modelFormat);return hash;
+}
 // S30: the weight fades the PERSON look toward the scene look; the scene look
 // itself never fades (S18-S29 faded both toward the original picture, so an old
 // recognition dimmed the whole screen). At weight 1 the result is unchanged.

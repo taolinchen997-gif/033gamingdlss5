@@ -13,10 +13,17 @@ struct RecipeView {
  const char* note="选择画面方案，调整后应用。";
  const char* runtimeNote="尚未应用分区方案";
  uint64_t requestRevision=0,appliedRevision=0;
+ // S32: the partition mode the 人物 / 场景 switch returns to (1 模式一, 2 模式二).
+ uint32_t partition=1;
+ // S32 超分模型 (the game's own DLSS): the last choice and what the last DLSS creation
+ // really asked for, refreshed from the core every frame (srmodelabi values).
+ uint32_t srModel=0,srApplied=0xFFFFFFFFu,srMajor=0,srMinor=0,srPatch=0;bool srPending=false,srExternal=false;
+ // S33: the game's last render-size question and our answer (M / L force 1/2 / 1/3).
+ uint32_t srQueries=0,srRenderW=0,srRenderH=0,srForcedMilli=0;bool srSizePending=false;
  // S23 (user): saved records shown under 保存与分享; the host loads and writes them.
  std::vector<yanyunrecipe::LibraryEntry> library;bool libraryLoaded=false;int removeArmed=-1;
 };
-struct RecipeEdits {bool load=false,save=false,applyWhole=false;int switchTo=-1,remove=-1;bool libraryChanged=false;};
+struct RecipeEdits {bool load=false,save=false,applyWhole=false;int switchTo=-1,remove=-1;bool libraryChanged=false;int srModel=-1;};
 inline const char* RecipeLabel(nrcontrolsabi::Id id){
  using namespace nrcontrolsabi;
  switch(id){
